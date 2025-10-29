@@ -1,0 +1,8 @@
+.env
+__pycache__/
+*.py[cod]
+*.pyc
+data/App Order Screenshots/
+data/Item List Screenshots/
+data/Order Info Screenshots/
+data/google-vision-key.json
