@@ -30,34 +30,35 @@ def load_data():
     df['Fecha'] = pd.to_datetime(df['Fecha'], format='%d/%m/%Y', errors='coerce')
     df['SKUs'] = pd.to_numeric(df['SKUs'], errors='coerce').fillna(0).astype(int)
     
-    # Parse tiempo
+    # Parse tiempo (supports M:SS and MM:SS formats)
     def parse_time(t):
         if pd.isna(t) or t == '': 
             return 0
         try:
             parts = str(t).split(':')
-            return int(parts[0]) * 60 + int(parts[1])
+            if len(parts) == 2:
+                return int(parts[0]) * 60 + int(parts[1])
+            return 0
         except:
             return 0
     
     df['Tiempo_mins'] = df['Tiempo'].apply(parse_time)
     
     # Filter out ignored orders for performance metrics
-    df_filtered = df[df.get('Ignorar', '') != 'IGN'].copy()
+    # Your sheet uses False/True, not 'IGN'
+    df_filtered = df[df['Ignorar'] == False].copy()
     
     return df, df_filtered
 
 def calculate_earnings(row):
-    """Calculate earnings for an order"""
+    """Calculate earnings for an order - assumes Mono picking"""
     skus = row.get('SKUs', 0)
     
-    # Check if bipicking
-    if pd.notna(row.get('Bipicking')) and row.get('Bipicking') != '':
-        base = 60 * skus + 1040
-    else:
-        base = 75 * skus + 1300
+    # Default to Mono pricing (75 CLP/SKU + 1300 base)
+    # You can add Tipo/Bipicking columns later if needed
+    base = 75 * skus + 1300
     
-    # Sunday multiplier
+    # Sunday multiplier (1.2x)
     if pd.notna(row.get('Fecha')) and row['Fecha'].weekday() == 6:
         base *= 1.2
     
