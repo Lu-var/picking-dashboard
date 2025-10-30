@@ -304,5 +304,75 @@ def all_time_stats():
         'avg_speed': round(avg_speed, 1)
     })
 
+@app.route('/api/records_detailed')
+def records_detailed():
+    """Get detailed records and analytics"""
+    df, df_filtered = load_data()
+    
+    # Calculate speed for all orders
+    df_filtered['speed'] = (df_filtered['SKUs'] / df_filtered['Tiempo_mins'] * 60).round(1)
+    
+    # Speed distribution by SKU ranges
+    speed_by_range = {}
+    ranges = [(1, 5), (6, 10), (11, 20), (21, 30), (31, 50), (51, 100)]
+    
+    for min_skus, max_skus in ranges:
+        range_data = df_filtered[(df_filtered['SKUs'] >= min_skus) & (df_filtered['SKUs'] <= max_skus)]
+        if len(range_data) > 0:
+            speed_by_range[f"{min_skus}-{max_skus} SKUs"] = {
+                'avg_speed': round(range_data['speed'].mean(), 1),
+                'max_speed': round(range_data['speed'].max(), 1),
+                'orders': len(range_data),
+                'avg_time': round(range_data['Tiempo_mins'].mean(), 1)
+            }
+    
+    # Top 10 fastest orders
+    top_fast = df_filtered.nsmallest(10, 'Tiempo_mins')[['Cliente', 'SKUs', 'Tiempo_mins', 'speed']].to_dict('records')
+    
+    # Top 10 highest speed orders (min 10 SKUs)
+    big_orders = df_filtered[df_filtered['SKUs'] >= 10]
+    top_speed = big_orders.nlargest(10, 'speed')[['Cliente', 'SKUs', 'Tiempo_mins', 'speed']].to_dict('records')
+    
+    # Speed trends over time (last 30 days)
+    recent_30 = df_filtered[df_filtered['Fecha'] >= (datetime.now() - timedelta(days=30))]
+    daily_avg = recent_30.groupby(recent_30['Fecha'].dt.date)['speed'].mean().round(1)
+    speed_trend = [{'date': str(date), 'speed': float(speed)} for date, speed in daily_avg.items()]
+    
+    # Weekly performance comparison
+    weeks = []
+    for i in range(4):  # Last 4 weeks
+        week_start = datetime.now() - timedelta(days=(i+1)*7)
+        week_end = week_start + timedelta(days=7)
+        week_data = df_filtered[(df_filtered['Fecha'] >= week_start) & (df_filtered['Fecha'] < week_end)]
+        
+        if len(week_data) > 0:
+            weeks.append({
+                'week': f"Semana {4-i}",
+                'orders': len(week_data),
+                'avg_speed': round(week_data['speed'].mean(), 1),
+                'total_skus': int(week_data['SKUs'].sum()),
+                'total_time': int(week_data['Tiempo_mins'].sum())
+            })
+    
+    return jsonify({
+        'speed_by_range': speed_by_range,
+        'top_fast_orders': top_fast,
+        'top_speed_orders': top_speed,
+        'speed_trend': speed_trend[-14:],  # Last 14 days
+        'weekly_comparison': weeks
+    })
+
+@app.route('/api/layout')
+def get_layout():
+    """Serve darkstore layout data"""
+    try:
+        with open('data/darkstore_layout.json', 'r', encoding='utf-8') as f:
+            layout_data = json.load(f)
+        return jsonify(layout_data)
+    except FileNotFoundError:
+        return jsonify({'error': 'Layout file not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
