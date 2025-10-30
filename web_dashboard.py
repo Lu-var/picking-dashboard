@@ -30,14 +30,16 @@ def load_data():
     df['Fecha'] = pd.to_datetime(df['Fecha'], format='%d/%m/%Y', errors='coerce')
     df['SKUs'] = pd.to_numeric(df['SKUs'], errors='coerce').fillna(0).astype(int)
     
-    # Parse tiempo (supports M:SS and MM:SS formats)
+    # Parse tiempo (supports H:MM format like 1:20 = 1 hour 20 mins = 80 mins)
     def parse_time(t):
         if pd.isna(t) or t == '': 
             return 0
         try:
             parts = str(t).split(':')
             if len(parts) == 2:
-                return int(parts[0]) * 60 + int(parts[1])
+                hours = int(parts[0])
+                mins = int(parts[1])
+                return hours * 60 + mins
             return 0
         except:
             return 0
@@ -194,6 +196,112 @@ def general_stats():
         'recent_speed': round(recent_speed, 1),
         'previous_speed': round(previous_speed, 1),
         'change_percent': round(change, 1)
+    })
+
+@app.route('/api/month')
+def month_stats():
+    """Get current month stats"""
+    df, df_filtered = load_data()
+    
+    # Current month
+    now = datetime.now()
+    month_start = datetime(now.year, now.month, 1).date()
+    month_orders = df_filtered[df_filtered['Fecha'].dt.date >= month_start]
+    month_complete = df[df['Fecha'].dt.date >= month_start]  # For earnings
+    
+    total_orders = len(month_orders)
+    total_skus = int(month_orders['SKUs'].sum())
+    total_time = int(month_orders['Tiempo_mins'].sum())
+    
+    speed = (total_skus / total_time * 60) if total_time > 0 else 0
+    
+    # Calculate total earnings
+    month_complete['earnings'] = month_complete.apply(calculate_earnings, axis=1)
+    total_earned = int(month_complete['earnings'].sum())
+    
+    return jsonify({
+        'orders': total_orders,
+        'skus': total_skus,
+        'time': total_time,
+        'speed': round(speed, 1),
+        'earned': total_earned
+    })
+
+@app.route('/api/bests')
+def personal_bests():
+    """Get personal best stats"""
+    df, df_filtered = load_data()
+    
+    if len(df_filtered) == 0:
+        return jsonify({
+            'fastest_order': None,
+            'most_skus': None,
+            'best_speed': None
+        })
+    
+    # Calculate speed for each order (SKUs/hour)
+    df_filtered['speed'] = df_filtered.apply(
+        lambda x: round((x['SKUs'] / x['Tiempo_mins'] * 60), 1) if x['Tiempo_mins'] > 0 else 0,
+        axis=1
+    )
+    
+    # Fastest order (shortest time with at least 10 SKUs)
+    big_orders = df_filtered[df_filtered['SKUs'] >= 10].copy()
+    fastest = None
+    if len(big_orders) > 0:
+        fastest_row = big_orders.loc[big_orders['Tiempo_mins'].idxmin()]
+        fastest = {
+            'time': int(fastest_row['Tiempo_mins']),
+            'skus': int(fastest_row['SKUs']),
+            'cliente': str(fastest_row['Cliente'])[:20]
+        }
+    
+    # Most SKUs in one order
+    most_skus_row = df_filtered.loc[df_filtered['SKUs'].idxmax()]
+    most_skus = {
+        'skus': int(most_skus_row['SKUs']),
+        'time': int(most_skus_row['Tiempo_mins']),
+        'cliente': str(most_skus_row['Cliente'])[:20]
+    }
+    
+    # Best speed (min 10 SKUs)
+    best_speed_order = None
+    if len(big_orders) > 0:
+        best_speed_row = big_orders.loc[big_orders['speed'].idxmax()]
+        best_speed_order = {
+            'speed': round(best_speed_row['speed'], 1),
+            'skus': int(best_speed_row['SKUs']),
+            'time': int(best_speed_row['Tiempo_mins']),
+            'cliente': str(best_speed_row['Cliente'])[:20]
+        }
+    
+    return jsonify({
+        'fastest_order': fastest,
+        'most_skus': most_skus,
+        'best_speed': best_speed_order
+    })
+
+@app.route('/api/all_time')
+def all_time_stats():
+    """Get all-time earnings and stats"""
+    df, df_filtered = load_data()
+    
+    # Calculate total earnings from all orders
+    df['earnings'] = df.apply(calculate_earnings, axis=1)
+    total_earned = int(df['earnings'].sum())
+    
+    # Total stats
+    total_orders = len(df_filtered)
+    total_skus = int(df_filtered['SKUs'].sum())
+    total_time = int(df_filtered['Tiempo_mins'].sum())
+    
+    avg_speed = (total_skus / total_time * 60) if total_time > 0 else 0
+    
+    return jsonify({
+        'total_earned': total_earned,
+        'total_orders': total_orders,
+        'total_skus': total_skus,
+        'avg_speed': round(avg_speed, 1)
     })
 
 if __name__ == '__main__':
