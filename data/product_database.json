@@ -1,0 +1,2536 @@
+{
+  "products": {
+    "prod_38206": {
+      "product_id": "prod_38206",
+      "name": "Compota Vivo Mifrut Manzana 90 g",
+      "brand": "Vivo",
+      "normalized_name": "compota vivo mifrut manzana 90 g",
+      "locations": [
+        "PASILLO 4 ESTANTE 72"
+      ],
+      "prices": [
+        "$2.670 ($445 uni)"
+      ],
+      "avg_price_per_unit": 445.0,
+      "categories": [
+        "Despensa"
+      ],
+      "frequency": 12
+    },
+    "prod_48018": {
+      "product_id": "prod_48018",
+      "name": "1 K Arroz Grado 1 Banquete Premium Grano Largo y Ancho 1 kg",
+      "brand": "Banquete",
+      "normalized_name": "1 k arroz grado 1 banquete premium grano largo ancho 1 kg",
+      "locations": [
+        "PASILLO 5 ESTANTE 90"
+      ],
+      "prices": [
+        "$1.890 ($1890 uni)",
+        "$3.780 ($1890 uni)"
+      ],
+      "avg_price_per_unit": 1890.0,
+      "categories": [
+        "Granos y Cereales"
+      ],
+      "frequency": 6
+    },
+    "prod_04629": {
+      "product_id": "prod_04629",
+      "name": "Sal Fina Cuisine & Co 1 kg",
+      "brand": "Cuisine & Co",
+      "normalized_name": "sal fina cuisine & co 1 kg",
+      "locations": [
+        "PASILLO 4 ESTANTE 108"
+      ],
+      "prices": [
+        "$510 ($510 uni)"
+      ],
+      "avg_price_per_unit": 510.0,
+      "categories": [
+        "Despensa"
+      ],
+      "frequency": 2
+    },
+    "prod_35712": {
+      "product_id": "prod_35712",
+      "name": "Bebida Canada Dry Ginger Ale Zero 1.5 L",
+      "brand": "Canada Dry",
+      "normalized_name": "bebida canada dry ginger ale zero 1.5 l",
+      "locations": [
+        "PASILLO 7 ESTANTE 91"
+      ],
+      "prices": [
+        "$2.780 ($1390 uni)",
+        "$4.191 ($1397 uni)"
+      ],
+      "avg_price_per_unit": 1395.25,
+      "categories": [
+        "Bebidas"
+      ],
+      "frequency": 10
+    },
+    "prod_61632": {
+      "product_id": "prod_61632",
+      "name": "Pack 6 un. Néctar del Valle Naranja 200 сс",
+      "brand": "Del Valle",
+      "normalized_name": "pack 6 un. nectar valle naranja 200 сс",
+      "locations": [
+        "PASILLO 8 ESTANTE 68"
+      ],
+      "prices": [
+        "$1.790 ($1790 uni)"
+      ],
+      "avg_price_per_unit": 1790.0,
+      "categories": [
+        "Bebidas"
+      ],
+      "frequency": 2
+    },
+    "prod_18092": {
+      "product_id": "prod_18092",
+      "name": "Cappuccino Leche Loncoleche Proteína Capuccino 200 ml",
+      "brand": "Loncoleche",
+      "normalized_name": "cappuccino leche loncoleche proteina capuccino 200 ml",
+      "locations": [
+        "PASILLO 10 ESTANTE 70"
+      ],
+      "prices": [],
+      "avg_price_per_unit": 0.0,
+      "categories": [
+        "Limpieza y Hogar"
+      ],
+      "frequency": 8
+    },
+    "prod_92950": {
+      "product_id": "prod_92950",
+      "name": "Pack 12 un. Leche Surlat Entera 1 L",
+      "brand": "Surlat",
+      "normalized_name": "pack 12 un. leche surlat entera 1 l",
+      "locations": [
+        "PASILLO 10 ESTANTE 94"
+      ],
+      "prices": [
+        "$12.720 ($12720 uni)"
+      ],
+      "avg_price_per_unit": 12720.0,
+      "categories": [
+        "Limpieza y Hogar"
+      ],
+      "frequency": 2
+    },
+    "prod_42312": {
+      "product_id": "prod_42312",
+      "name": "Toallitas Húmedas PREMIUM Toallitas Húmedas Emubaby 2 Paquetes de 80 un.",
+      "brand": "Emubaby",
+      "normalized_name": "toallitas humedas premium toallitas humedas emubaby 2 paquetes 80 un.",
+      "locations": [
+        "PASILLO 12 ESTANTE 45"
+      ],
+      "prices": [],
+      "avg_price_per_unit": 0.0,
+      "categories": [
+        "Pasillo 12"
+      ],
+      "frequency": 2
+    },
+    "prod_66980": {
+      "product_id": "prod_66980",
+      "name": "Apio Mata 1 un.",
+      "brand": "Frutas y Verduras Propias",
+      "normalized_name": "apio mata 1 un.",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$1.490 ($1490 uni)"
+      ],
+      "avg_price_per_unit": 1490.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_30848": {
+      "product_id": "prod_30848",
+      "name": "Soprole Flan Flan Soprole Caramelo 110 g",
+      "brand": "Soprole",
+      "normalized_name": "soprole flan flan soprole caramelo 110 g",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$1.998 ($333 uni)"
+      ],
+      "avg_price_per_unit": 333.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 12
+    },
+    "prod_74895": {
+      "product_id": "prod_74895",
+      "name": "60ml Helado Sahne Nuss Paleta Mini Multipack 60 ml 5 un.",
+      "brand": "Sahne Nuss",
+      "normalized_name": "60ml helado sahne nuss paleta mini multipack 60 ml 5 un.",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$4.552 ($4552 uni)"
+      ],
+      "avg_price_per_unit": 4552.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_55171": {
+      "product_id": "prod_55171",
+      "name": "Helado Kit Kat Paleta Multipack 55 ml 5 un.",
+      "brand": "Savory",
+      "normalized_name": "helado kit kat paleta multipack 55 ml 5 un.",
+      "locations": [
+        ""
+      ],
+      "prices": [],
+      "avg_price_per_unit": 0.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_16585": {
+      "product_id": "prod_16585",
+      "name": "Flan Soprole Caramelo 110 g",
+      "brand": "Soprole",
+      "normalized_name": "flan soprole caramelo 110 g",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$1.998 ($333 uni)"
+      ],
+      "avg_price_per_unit": 333.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 12
+    },
+    "prod_22225": {
+      "product_id": "prod_22225",
+      "name": "Mini Paleta de Chocolate Helado Sahne Nuss Paleta Mini Multipack 60 ml 5 un.",
+      "brand": "Sahne Nuss",
+      "normalized_name": "mini paleta chocolate helado sahne nuss paleta mini multipack 60 ml 5 un.",
+      "locations": [
+        ""
+      ],
+      "prices": [],
+      "avg_price_per_unit": 0.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_40499": {
+      "product_id": "prod_40499",
+      "name": "Mini Paleta de Chocolate Helado Kit Kat Paleta Multipack 55 ml 5 un.",
+      "brand": "Savory",
+      "normalized_name": "mini paleta chocolate helado kit kat paleta multipack 55 ml 5 un.",
+      "locations": [
+        ""
+      ],
+      "prices": [],
+      "avg_price_per_unit": 0.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_49148": {
+      "product_id": "prod_49148",
+      "name": "Brócoli Films 1 un.",
+      "brand": "Frutas y Verduras Propias",
+      "normalized_name": "brocoli films 1 un.",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$1.690 ($1690 uni)"
+      ],
+      "avg_price_per_unit": 1690.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_21895": {
+      "product_id": "prod_21895",
+      "name": "Jalea Cuisine & Co Limón 100 g",
+      "brand": "Cuisine & Co",
+      "normalized_name": "jalea cuisine & co limon 100 g",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$1.160 ($290 uni)"
+      ],
+      "avg_price_per_unit": 290.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 8
+    },
+    "prod_36880": {
+      "product_id": "prod_36880",
+      "name": "SAN JOSE JUREL Jurel Al Natural San José Lata 300 g",
+      "brand": "San José",
+      "normalized_name": "san jose jurel pickeado jurel al natural san jose lata 300 g drenado",
+      "locations": [
+        "PASILLO 4 ESTANTE 42"
+      ],
+      "prices": [
+        "$7.780 ($1945 uni)"
+      ],
+      "avg_price_per_unit": 1945.0,
+      "categories": [
+        "Despensa"
+      ],
+      "frequency": 8
+    },
+    "prod_66871": {
+      "product_id": "prod_66871",
+      "name": "Pepita de Uva Aceite de Pepita de Uva Chef 500 ml",
+      "brand": "Chef",
+      "normalized_name": "pepita uva pickeado aceite pepita uva chef 500 ml",
+      "locations": [
+        "PASILLO 4 ESTANTE 49"
+      ],
+      "prices": [
+        "$3.967 ($3967 uni)"
+      ],
+      "avg_price_per_unit": 3967.0,
+      "categories": [
+        "Despensa"
+      ],
+      "frequency": 2
+    },
+    "prod_80766": {
+      "product_id": "prod_80766",
+      "name": "Endulzante Daily Stevia Líquido 400 ml",
+      "brand": "Daily",
+      "normalized_name": "pickeado endulzante daily stevia liquido 400 ml",
+      "locations": [
+        "PASILLO 5 ESTANTE 56"
+      ],
+      "prices": [
+        "$4.750 ($4750 uni)"
+      ],
+      "avg_price_per_unit": 4750.0,
+      "categories": [
+        "Granos y Cereales"
+      ],
+      "frequency": 2
+    },
+    "prod_91685": {
+      "product_id": "prod_91685",
+      "name": "Endulzante lansa Cero K Líquido Alulosa 250 ml",
+      "brand": "lansa Cero K",
+      "normalized_name": "pickeado endulzante lansa cero k liquido alulosa 250 ml",
+      "locations": [
+        "PASILLO 5 ESTANTE 58"
+      ],
+      "prices": [
+        "$3.290 ($3290 uni)"
+      ],
+      "avg_price_per_unit": 3290.0,
+      "categories": [
+        "Granos y Cereales"
+      ],
+      "frequency": 2
+    },
+    "prod_83487": {
+      "product_id": "prod_83487",
+      "name": "Pack 6 un. Néctar del Valle Durazno 200 сс",
+      "brand": "Del Valle",
+      "normalized_name": "pickeado pack 6 un. nectar valle durazno 200 сс",
+      "locations": [
+        "PASILLO 8 ESTANTE 68"
+      ],
+      "prices": [
+        "$1.790 ($1790 uni)"
+      ],
+      "avg_price_per_unit": 1790.0,
+      "categories": [
+        "Bebidas"
+      ],
+      "frequency": 2
+    },
+    "prod_48785": {
+      "product_id": "prod_48785",
+      "name": "Pack 6 un. Néctar del Valle Naranja 200 сс",
+      "brand": "Del Valle",
+      "normalized_name": "pickeado pack 6 un. nectar valle naranja 200 сс",
+      "locations": [
+        "PASILLO 8 ESTANTE 68"
+      ],
+      "prices": [
+        "$3.580 ($1790 uni)"
+      ],
+      "avg_price_per_unit": 1790.0,
+      "categories": [
+        "Bebidas"
+      ],
+      "frequency": 4
+    },
+    "prod_72119": {
+      "product_id": "prod_72119",
+      "name": "Limpiador en Crema Limpiador Crema Cif Original 500 ml",
+      "brand": "Cif",
+      "normalized_name": "limpiador crema pickeado limpiador crema cif original 500 ml",
+      "locations": [
+        "PASILLO 9 ESTANTE 71"
+      ],
+      "prices": [],
+      "avg_price_per_unit": 0.0,
+      "categories": [
+        "Limpieza y Hogar"
+      ],
+      "frequency": 4
+    },
+    "prod_31076": {
+      "product_id": "prod_31076",
+      "name": "ml Limpiador Antigrasa Cif Antigrasa Biodegradable Gatillo 500 ml",
+      "brand": "Cif",
+      "normalized_name": "ml pickeado limpiador antigrasa cif antigrasa biodegradable gatillo 500 ml",
+      "locations": [
+        "PASILLO 9 ESTANTE 69"
+      ],
+      "prices": [
+        "$2.750 ($2750 uni)"
+      ],
+      "avg_price_per_unit": 2750.0,
+      "categories": [
+        "Limpieza y Hogar"
+      ],
+      "frequency": 2
+    },
+    "prod_10923": {
+      "product_id": "prod_10923",
+      "name": "TOALLITAS DESINFECTANTES 80 un Toallitas Desinfectantes Clorox Expert Flowpack 80 un.",
+      "brand": "Clorox",
+      "normalized_name": "toallitas desinfectantes 80 un pickeado toallitas desinfectantes clorox expert flowpack 80 un.",
+      "locations": [
+        "PASILLO 9 ESTANTE 93"
+      ],
+      "prices": [
+        "$3.349 ($3349 uni)"
+      ],
+      "avg_price_per_unit": 3349.0,
+      "categories": [
+        "Limpieza y Hogar"
+      ],
+      "frequency": 2
+    },
+    "prod_16869": {
+      "product_id": "prod_16869",
+      "name": "Galletas Mini Donuts 40 g",
+      "brand": "Costa",
+      "normalized_name": "pickeado galletas mini donuts 40 g",
+      "locations": [
+        "PASILLO 7 ESTANTE 54"
+      ],
+      "prices": [
+        "$3.500 ($350 uni)"
+      ],
+      "avg_price_per_unit": 350.0,
+      "categories": [
+        "Bebidas"
+      ],
+      "frequency": 20
+    },
+    "prod_02950": {
+      "product_id": "prod_02950",
+      "name": "Galletas Mini Donuts Blanca 35 g",
+      "brand": "Costa",
+      "normalized_name": "pickeado galletas mini donuts blanca 35 g",
+      "locations": [
+        "PASILLO 7 ESTANTE 54"
+      ],
+      "prices": [
+        "$3.500 ($350 uni)"
+      ],
+      "avg_price_per_unit": 350.0,
+      "categories": [
+        "Bebidas"
+      ],
+      "frequency": 20
+    },
+    "prod_59180": {
+      "product_id": "prod_59180",
+      "name": "Cerveza Austral Calafate Ale 5.0° Lata 470 cc AUSTRAL CALAFATE Austral",
+      "brand": "Austral",
+      "normalized_name": "pickeado cerveza austral calafate ale 5.0° lata 470 cc austral calafate austral",
+      "locations": [
+        "PASILLO 1 ESTANTE 85"
+      ],
+      "prices": [
+        "$7.164 ($1194 uni)"
+      ],
+      "avg_price_per_unit": 1194.0,
+      "categories": [
+        "Frutas y Verduras"
+      ],
+      "frequency": 12
+    },
+    "prod_81137": {
+      "product_id": "prod_81137",
+      "name": "Lechuga Francesa 1 un.",
+      "brand": "Frutas y verduras Propias",
+      "normalized_name": "pickeado lechuga francesa 1 un.",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$1.290 ($1290 uni)"
+      ],
+      "avg_price_per_unit": 1290.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_89131": {
+      "product_id": "prod_89131",
+      "name": "Soprole YOCHITO VITAMINA De Yogurt Batido Soprole Vainilla 120 g",
+      "brand": "Soprole",
+      "normalized_name": "soprole yochito vitamina pickeado yogurt batido soprole vainilla 120 g",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$2.560 ($320 uni)"
+      ],
+      "avg_price_per_unit": 320.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 16
+    },
+    "prod_73862": {
+      "product_id": "prod_73862",
+      "name": "FRUTOS QUESO MANTECOSO LAMINADO PREMIUM 500g Queso Mantecoso Matthei Envasado Laminado 500 g",
+      "brand": "Matthei",
+      "normalized_name": "frutos queso mantecoso laminado premium 500g pickeado queso mantecoso matthei envasado laminado 500 g",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$10.908 ($5454 uni)"
+      ],
+      "avg_price_per_unit": 5454.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 4
+    },
+    "prod_22268": {
+      "product_id": "prod_22268",
+      "name": "Smoothie Frutos del Maipo Detox Manzana, Piña, Espinaca, Apio y M...",
+      "brand": "Frutos Del Maipo",
+      "normalized_name": "pickeado smoothie frutos maipo detox manzana, pina, espinaca, apio m...",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$4.750 ($4750 uni)"
+      ],
+      "avg_price_per_unit": 4750.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_20998": {
+      "product_id": "prod_20998",
+      "name": "Papas Pre Fritas 1 kg",
+      "brand": "Cuisine & Co",
+      "normalized_name": "pickeado papas pre fritas 1 kg",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$3.890 ($3890 uni)"
+      ],
+      "avg_price_per_unit": 3890.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_76948": {
+      "product_id": "prod_76948",
+      "name": "FINAS PAPAS PREFRITAS Papa Pre Frita Fina Minuto Verde 800 g",
+      "brand": "Minuto Verde",
+      "normalized_name": "finas papas prefritas pickeado papa pre frita fina minuto verde 800 g",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$3.217 ($3217 uni)"
+      ],
+      "avg_price_per_unit": 3217.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_93982": {
+      "product_id": "prod_93982",
+      "name": "PAPAS CANDA Papas Canoa Minuto Verde 800 g",
+      "brand": "Minuto Verde",
+      "normalized_name": "papas canda pickeado papas canoa minuto verde 800 g",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$3.367 ($3367 uni)"
+      ],
+      "avg_price_per_unit": 3367.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_51205": {
+      "product_id": "prod_51205",
+      "name": "Producto 1500ml",
+      "brand": "Genérico",
+      "normalized_name": "1500",
+      "locations": [
+        "PASILLO 1 ESTANTE 103"
+      ],
+      "prices": [
+        "$19.572 ($4893 uni)"
+      ],
+      "avg_price_per_unit": 4893.0,
+      "categories": [
+        "Frutas y Verduras"
+      ],
+      "frequency": 8
+    },
+    "prod_61259": {
+      "product_id": "prod_61259",
+      "name": "Bebida Coca-Cola Zero 1.5 L",
+      "brand": "Coca-Cola",
+      "normalized_name": "bebida coca-cola zero 1.5 l",
+      "locations": [
+        "PASILLO 7 ESTANTE 105"
+      ],
+      "prices": [
+        "$18.540 ($1545 uni)"
+      ],
+      "avg_price_per_unit": 1545.0,
+      "categories": [
+        "Bebidas"
+      ],
+      "frequency": 24
+    },
+    "prod_59080": {
+      "product_id": "prod_59080",
+      "name": "Bebida Coca-Cola Original 1.5L",
+      "brand": "Coca-Cola",
+      "normalized_name": "bebida coca-cola original 1.5l",
+      "locations": [
+        "PASILLO 7 ESTANTE 107"
+      ],
+      "prices": [
+        "$18.540 ($1545 uni)"
+      ],
+      "avg_price_per_unit": 1545.0,
+      "categories": [
+        "Bebidas"
+      ],
+      "frequency": 24
+    },
+    "prod_15723": {
+      "product_id": "prod_15723",
+      "name": "Queso Gauda Colun Laminado 500 g",
+      "brand": "Colun",
+      "normalized_name": "queso gauda colun laminado 500 g",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$28.740 ($4790 uni)"
+      ],
+      "avg_price_per_unit": 4790.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 12
+    },
+    "prod_44814": {
+      "product_id": "prod_44814",
+      "name": "Galletas Bocaditos 300 g",
+      "brand": "Dos en Uno",
+      "normalized_name": "galletas bocaditos 300 g",
+      "locations": [
+        "PASILLO 7 ESTANTE 50"
+      ],
+      "prices": [
+        "$1.790 ($1790 uni)"
+      ],
+      "avg_price_per_unit": 1790.0,
+      "categories": [
+        "Bebidas"
+      ],
+      "frequency": 2
+    },
+    "prod_00835": {
+      "product_id": "prod_00835",
+      "name": "Galletas Selz Salvado Light 600 g",
+      "brand": "Selz",
+      "normalized_name": "galletas selz salvado light 600 g",
+      "locations": [
+        "PASILLO 6 ESTANTE 81"
+      ],
+      "prices": [
+        "$2.990 ($2990 uni)"
+      ],
+      "avg_price_per_unit": 2990.0,
+      "categories": [
+        "Granos y Cereales"
+      ],
+      "frequency": 2
+    },
+    "prod_75449": {
+      "product_id": "prod_75449",
+      "name": "3+1 No Raya Anatomica Esponja Virutex Antibacterial Lisa 4 un.",
+      "brand": "Virutex",
+      "normalized_name": "3+1 no raya anatomica esponja virutex antibacterial lisa 4 un.",
+      "locations": [
+        "PASILLO 9 ESTANTE 98"
+      ],
+      "prices": [
+        "$1.290 ($1290 uni)"
+      ],
+      "avg_price_per_unit": 1290.0,
+      "categories": [
+        "Limpieza y Hogar"
+      ],
+      "frequency": 2
+    },
+    "prod_40379": {
+      "product_id": "prod_40379",
+      "name": "Killme PEPINILLOS PEPINOS CETRIOLI Pepinillos Kühne Cetrioli Agridulces 185 g",
+      "brand": "Kühne",
+      "normalized_name": "killme pepinillos pepinos cetrioli pepinillos kuhne cetrioli agridulces 185 g drenado",
+      "locations": [
+        "PASILLO 10 ESTANTE 48"
+      ],
+      "prices": [
+        "$3.190 ($3190 uni)"
+      ],
+      "avg_price_per_unit": 3190.0,
+      "categories": [
+        "Limpieza y Hogar"
+      ],
+      "frequency": 2
+    },
+    "prod_74471": {
+      "product_id": "prod_74471",
+      "name": "FAVORITA Acolchado Papel Higiénico Favorita Acolchado Doble Hoja 22 m 40 un.",
+      "brand": "Favorita",
+      "normalized_name": "favorita acolchado papel higienico favorita acolchado doble hoja 22 m 40 un.",
+      "locations": [
+        "PASILLO 10 ESTANTE 47"
+      ],
+      "prices": [
+        "$12.990 ($12990 uni)"
+      ],
+      "avg_price_per_unit": 12990.0,
+      "categories": [
+        "Limpieza y Hogar"
+      ],
+      "frequency": 2
+    },
+    "prod_15694": {
+      "product_id": "prod_15694",
+      "name": "Queso Cheddar Alerces Laminado 160 g",
+      "brand": "Fundo Los Alerces",
+      "normalized_name": "queso cheddar alerces laminado 160 g",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$1.990 ($1990 uni)"
+      ],
+      "avg_price_per_unit": 1990.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_47113": {
+      "product_id": "prod_47113",
+      "name": "Hamburguesa de Vacuno La Crianza Extratasty 100 g",
+      "brand": "La Crianza",
+      "normalized_name": "g",
+      "locations": [
+        ""
+      ],
+      "prices": [],
+      "avg_price_per_unit": 0.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_92953": {
+      "product_id": "prod_92953",
+      "name": "HAMBURGUESA EXTRA TASTY Hamburguesa de Vacuno La Crianza Extratasty 100 g",
+      "brand": "La Crianza",
+      "normalized_name": "hamburguesa extra tasty hamburguesa vacuno crianza extratasty 100 g",
+      "locations": [
+        ""
+      ],
+      "prices": [],
+      "avg_price_per_unit": 0.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_72426": {
+      "product_id": "prod_72426",
+      "name": "Mandarina Malla 1 kg",
+      "brand": "Frutas y Verduras Propias",
+      "normalized_name": "mandarina malla 1 kg",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$2.000 ($1000 uni)"
+      ],
+      "avg_price_per_unit": 1000.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 4
+    },
+    "prod_19778": {
+      "product_id": "prod_19778",
+      "name": "Producto Krea Talla/Tamaño L",
+      "brand": "Krea",
+      "normalized_name": "l",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$1.253 ($1253 uni)"
+      ],
+      "avg_price_per_unit": 1253.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_15948": {
+      "product_id": "prod_15948",
+      "name": "Pro Arándano Prize Pote 125 g",
+      "brand": "Frutas y verduras Propias",
+      "normalized_name": "pro arandano prize pote 125 g",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$3.000 ($1500 uni)"
+      ],
+      "avg_price_per_unit": 1500.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 4
+    },
+    "prod_72721": {
+      "product_id": "prod_72721",
+      "name": "Fuchs PAN MULTIGRAND 350g Pan Molde Fuchs Multigrano 350 g",
+      "brand": "Fuchs",
+      "normalized_name": "fuchs pan multigrand 350g pan molde fuchs multigrano 350 g",
+      "locations": [
+        "PASILLO 6 ESTANTE 49"
+      ],
+      "prices": [
+        "$2.390 ($2390 uni)"
+      ],
+      "avg_price_per_unit": 2390.0,
+      "categories": [
+        "Granos y Cereales"
+      ],
+      "frequency": 2
+    },
+    "prod_50799": {
+      "product_id": "prod_50799",
+      "name": "Huevos La Granja Grandes Color 12 un.",
+      "brand": "La Granja",
+      "normalized_name": "huevos granja grandes color 12 un.",
+      "locations": [
+        "PASILLO 8 ESTANTE 83"
+      ],
+      "prices": [
+        "$4.000 ($4000 uni)"
+      ],
+      "avg_price_per_unit": 4000.0,
+      "categories": [
+        "Bebidas"
+      ],
+      "frequency": 2
+    },
+    "prod_33942": {
+      "product_id": "prod_33942",
+      "name": "Daks Summe Summer Mix Dole 150 g",
+      "brand": "Dole",
+      "normalized_name": "daks summe summer mix dole 150 g",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$3.390 ($3390 uni)"
+      ],
+      "avg_price_per_unit": 3390.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_24620": {
+      "product_id": "prod_24620",
+      "name": "Summer Mix Dole 150 g",
+      "brand": "Dole",
+      "normalized_name": "summer mix dole 150 g",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$3.390 ($3390 uni)"
+      ],
+      "avg_price_per_unit": 3390.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_67355": {
+      "product_id": "prod_67355",
+      "name": "Quesillo Sin Lactosa Colun 320 g",
+      "brand": "Colun",
+      "normalized_name": "quesillo lactosa colun 320 g",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$2.790 ($2790 uni)"
+      ],
+      "avg_price_per_unit": 2790.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_95122": {
+      "product_id": "prod_95122",
+      "name": "Filetitos de Pechuga Congelado 700 g",
+      "brand": "Super Pollo",
+      "normalized_name": "filetitos pechuga congelado 700 g",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$7.490 ($7490 uni)"
+      ],
+      "avg_price_per_unit": 7490.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_00556": {
+      "product_id": "prod_00556",
+      "name": "Jurel Al Natural San José Lata 300 g",
+      "brand": "San José",
+      "normalized_name": "jurel al natural san jose lata 300 g drenado",
+      "locations": [
+        "PASILLO 4 ESTANTE 42"
+      ],
+      "prices": [
+        "$3.890 ($1945 uni)"
+      ],
+      "avg_price_per_unit": 1945.0,
+      "categories": [
+        "Despensa"
+      ],
+      "frequency": 4
+    },
+    "prod_23215": {
+      "product_id": "prod_23215",
+      "name": "malloa ITALIANA PACK AHORRO Salsa de Tomate Salsa de Tomate Malloa Italiana 200 g 6 un.",
+      "brand": "Malloa",
+      "normalized_name": "malloa italiana pack ahorro salsa tomate salsa tomate malloa italiana 200 g 6 un.",
+      "locations": [
+        ""
+      ],
+      "prices": [],
+      "avg_price_per_unit": 0.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_60519": {
+      "product_id": "prod_60519",
+      "name": "Tallarín Vitaminizado 400 g",
+      "brand": "Cuisine & Co",
+      "normalized_name": "tallarin vitaminizado 400 g",
+      "locations": [
+        "PASILLO 5 ESTANTE 87"
+      ],
+      "prices": [
+        "$3.240 ($810 uni)"
+      ],
+      "avg_price_per_unit": 810.0,
+      "categories": [
+        "Granos y Cereales"
+      ],
+      "frequency": 8
+    },
+    "prod_03980": {
+      "product_id": "prod_03980",
+      "name": "Huevos Cuisine & Co Extra Grandes Color 20 un.",
+      "brand": "Cuisine & Co",
+      "normalized_name": "huevos cuisine & co extra grandes color 20 un.",
+      "locations": [
+        "PASILLO 8 ESTANTE 81"
+      ],
+      "prices": [
+        "$6.990 ($6990 uni)"
+      ],
+      "avg_price_per_unit": 6990.0,
+      "categories": [
+        "Bebidas"
+      ],
+      "frequency": 2
+    },
+    "prod_22585": {
+      "product_id": "prod_22585",
+      "name": "Soprole Sin Azúcar Yogurt Soprole Sin Azúcar Vainilla 120 g",
+      "brand": "Soprole",
+      "normalized_name": "soprole azucar yogurt soprole azucar vainilla 120 g",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$1.400 ($350 uni)"
+      ],
+      "avg_price_per_unit": 350.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 8
+    },
+    "prod_10119": {
+      "product_id": "prod_10119",
+      "name": "GYOZA Mantequilla Soprole con Sal 250 g",
+      "brand": "Soprole",
+      "normalized_name": "gyoza mantequilla soprole sal 250 g",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$5.380 ($2690 uni)"
+      ],
+      "avg_price_per_unit": 2690.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 4
+    },
+    "prod_78215": {
+      "product_id": "prod_78215",
+      "name": "Gyozas de Cerdo 12 un.",
+      "brand": "Alimentos Shen",
+      "normalized_name": "gyozas cerdo 12 un.",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$6.580 ($3290 uni)"
+      ],
+      "avg_price_per_unit": 3290.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 4
+    },
+    "prod_66628": {
+      "product_id": "prod_66628",
+      "name": "Pack 6 un. Bebida Láctea Yogu Yogu Mora 200 ml",
+      "brand": "Yogu - Yogu",
+      "normalized_name": "pack 6 un. bebida lactea yogu yogu mora 200 ml",
+      "locations": [
+        "PASILLO 10 ESTANTE 70"
+      ],
+      "prices": [
+        "$3.660 ($3660 uni)"
+      ],
+      "avg_price_per_unit": 3660.0,
+      "categories": [
+        "Limpieza y Hogar"
+      ],
+      "frequency": 2
+    },
+    "prod_81484": {
+      "product_id": "prod_81484",
+      "name": "Nuevo Soprole Sin Azúcar Madida BATIDO Yogurt Soprole Sin Azúcar Natural Endulzado 120 g",
+      "brand": "Soprole",
+      "normalized_name": "nuevo soprole azucar madida batido yogurt soprole azucar natural endulzado 120 g",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$2.800 ($350 uni)"
+      ],
+      "avg_price_per_unit": 350.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 16
+    },
+    "prod_75132": {
+      "product_id": "prod_75132",
+      "name": "Vino Santa Ema Carmenere Reserva 750 CC",
+      "brand": "Santa Ema",
+      "normalized_name": "vino santa ema carmenere reserva 750 cc",
+      "locations": [
+        "PASILLO 1 ESTANTE 66"
+      ],
+      "prices": [
+        "$3.414 ($3414 uni)"
+      ],
+      "avg_price_per_unit": 3414.0,
+      "categories": [
+        "Frutas y Verduras"
+      ],
+      "frequency": 2
+    },
+    "prod_90702": {
+      "product_id": "prod_90702",
+      "name": "Vino Santa Ema Gran Reserva Merlot 750 сс",
+      "brand": "Santa Ema",
+      "normalized_name": "vino santa ema gran reserva merlot 750 сс",
+      "locations": [
+        "PASILLO 1 ESTANTE 76"
+      ],
+      "prices": [
+        "$6.774 ($6774 uni)"
+      ],
+      "avg_price_per_unit": 6774.0,
+      "categories": [
+        "Frutas y Verduras"
+      ],
+      "frequency": 2
+    },
+    "prod_74741": {
+      "product_id": "prod_74741",
+      "name": "Galletas Soda Line 160 g Soda Line",
+      "brand": "Costa",
+      "normalized_name": "galletas soda line 160 g soda line",
+      "locations": [
+        ""
+      ],
+      "prices": [],
+      "avg_price_per_unit": 0.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 12
+    },
+    "prod_17622": {
+      "product_id": "prod_17622",
+      "name": "Crema de leche 200 m Crema de Leche Loncoleche Light 200 ml",
+      "brand": "Loncoleche",
+      "normalized_name": "crema leche 200 m crema leche loncoleche light 200 ml",
+      "locations": [
+        "PASILLO 8 ESTANTE 89"
+      ],
+      "prices": [
+        "$4.020 ($1340 uni)"
+      ],
+      "avg_price_per_unit": 1340.0,
+      "categories": [
+        "Bebidas"
+      ],
+      "frequency": 6
+    },
+    "prod_57697": {
+      "product_id": "prod_57697",
+      "name": "HOME care MUTO Paño Multiuso Amarillo Home Care 38 x 38 cm 6 un.",
+      "brand": "Home Care",
+      "normalized_name": "home care muto pano multiuso amarillo home care 38 x 38 cm 6 un.",
+      "locations": [
+        "PASILLO 9 ESTANTE 102"
+      ],
+      "prices": [
+        "$4.490 ($4490 uni)"
+      ],
+      "avg_price_per_unit": 4490.0,
+      "categories": [
+        "Limpieza y Hogar"
+      ],
+      "frequency": 2
+    },
+    "prod_96555": {
+      "product_id": "prod_96555",
+      "name": "NEGA HOME care Toalla de Papel Home Care 26 m 2 un.",
+      "brand": "Home Care",
+      "normalized_name": "nega home care toalla papel home care 26 m 2 un.",
+      "locations": [
+        "PASILLO 10 ESTANTE 85"
+      ],
+      "prices": [
+        "$5.380 ($2690 uni)"
+      ],
+      "avg_price_per_unit": 2690.0,
+      "categories": [
+        "Limpieza y Hogar"
+      ],
+      "frequency": 4
+    },
+    "prod_66139": {
+      "product_id": "prod_66139",
+      "name": "NGA HOME care Toalla de Papel Home Care 26 m 2 un.",
+      "brand": "Home Care",
+      "normalized_name": "nga home care toalla papel home care 26 m 2 un.",
+      "locations": [
+        "PASILLO 10 ESTANTE 85"
+      ],
+      "prices": [
+        "$5.380 ($2690 uni)"
+      ],
+      "avg_price_per_unit": 2690.0,
+      "categories": [
+        "Limpieza y Hogar"
+      ],
+      "frequency": 4
+    },
+    "prod_70999": {
+      "product_id": "prod_70999",
+      "name": "Protectores Diarios Nosotras Largos 50 un.",
+      "brand": "Nosotras",
+      "normalized_name": "protectores diarios nosotras largos 50 un.",
+      "locations": [
+        "PASILLO 11 ESTANTE 71"
+      ],
+      "prices": [
+        "$4.780 ($2390 uni)"
+      ],
+      "avg_price_per_unit": 2390.0,
+      "categories": [
+        "Pasillo 11"
+      ],
+      "frequency": 4
+    },
+    "prod_49583": {
+      "product_id": "prod_49583",
+      "name": "Jabón Íntimo Nosotras Frescura Extrema 200 ml",
+      "brand": "Nosotras",
+      "normalized_name": "jabon intimo nosotras frescura extrema 200 ml",
+      "locations": [
+        "PASILLO 11 ESTANTE 69"
+      ],
+      "prices": [
+        "$4.326 ($4326 uni)"
+      ],
+      "avg_price_per_unit": 4326.0,
+      "categories": [
+        "Pasillo 11"
+      ],
+      "frequency": 2
+    },
+    "prod_46533": {
+      "product_id": "prod_46533",
+      "name": "Ladysoft BASICA Toallas Femeninas Tela Suave Toallas Higiénicas Ladysoft Básicas Sin Alas 8 un.",
+      "brand": "Ladysoft",
+      "normalized_name": "ladysoft basica toallas femeninas tela suave toallas higienicas ladysoft basicas alas 8 un.",
+      "locations": [
+        "PASILLO 11 ESTANTE 67"
+      ],
+      "prices": [],
+      "avg_price_per_unit": 0.0,
+      "categories": [
+        "Pasillo 11"
+      ],
+      "frequency": 6
+    },
+    "prod_25833": {
+      "product_id": "prod_25833",
+      "name": "MOLDE Pan Molde Blanco Sin Gluten 600 g",
+      "brand": "NoGlut",
+      "normalized_name": "molde pan molde blanco gluten 600 g",
+      "locations": [
+        "PASILLO 6 ESTANTE 50"
+      ],
+      "prices": [
+        "$5.450 ($5450 uni)"
+      ],
+      "avg_price_per_unit": 5450.0,
+      "categories": [
+        "Granos y Cereales"
+      ],
+      "frequency": 2
+    },
+    "prod_04084": {
+      "product_id": "prod_04084",
+      "name": "ATL LOMITOS Atún Lomitos en Agua 220 g , 340 g",
+      "brand": "Cuisine & Co",
+      "normalized_name": "atl lomitos atun lomitos agua 220 g drenado, 340 g neto",
+      "locations": [
+        "PASILLO 4 ESTANTE 48"
+      ],
+      "prices": [],
+      "avg_price_per_unit": 0.0,
+      "categories": [
+        "Despensa"
+      ],
+      "frequency": 6
+    },
+    "prod_08803": {
+      "product_id": "prod_08803",
+      "name": "Pimiento Amarillo 1 un.",
+      "brand": "Frutas y verduras Propias",
+      "normalized_name": "pimiento amarillo 1 un.",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$1.790 ($1790 uni)"
+      ],
+      "avg_price_per_unit": 1790.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_60598": {
+      "product_id": "prod_60598",
+      "name": "Pimiento Rojo Extra",
+      "brand": "Frutas y verduras Propias",
+      "normalized_name": "pimiento rojo extra",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$1.790 ($1790 uni)"
+      ],
+      "avg_price_per_unit": 1790.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_04538": {
+      "product_id": "prod_04538",
+      "name": "Bebida Láctea Soprole Kéfir Natural 1 L",
+      "brand": "Soprole",
+      "normalized_name": "bebida lactea soprole kefir natural 1 l",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$8.000 ($2000 uni)"
+      ],
+      "avg_price_per_unit": 2000.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 8
+    },
+    "prod_00661": {
+      "product_id": "prod_00661",
+      "name": "Pack 4 un. Jalea Regimel Arándano 100 g",
+      "brand": "Regimel",
+      "normalized_name": "pack 4 un. jalea regimel arandano 100 g",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$2.090 ($2090 uni)"
+      ],
+      "avg_price_per_unit": 2090.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_34606": {
+      "product_id": "prod_34606",
+      "name": "Pack 4 un. Jalea Regimel Arándano 100 g",
+      "brand": "Regimel",
+      "normalized_name": "g",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$2.090 ($2090 uni)"
+      ],
+      "avg_price_per_unit": 2090.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_18044": {
+      "product_id": "prod_18044",
+      "name": "Choclo Grano Cuisine & Co 1 kg",
+      "brand": "Cuisine & Co",
+      "normalized_name": "choclo grano cuisine & co 1 kg",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$3.150 ($3150 uni)"
+      ],
+      "avg_price_per_unit": 3150.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_71066": {
+      "product_id": "prod_71066",
+      "name": "Gesto Obsesión Galletas Obsesión Maní 85 g",
+      "brand": "Costa",
+      "normalized_name": "gesto obsesion galletas obsesion mani 85 g",
+      "locations": [
+        "PASILLO 7 ESTANTE 52"
+      ],
+      "prices": [
+        "$2.250 ($1125 uni)"
+      ],
+      "avg_price_per_unit": 1125.0,
+      "categories": [
+        "Bebidas"
+      ],
+      "frequency": 4
+    },
+    "prod_61455": {
+      "product_id": "prod_61455",
+      "name": "Pack Pomarola Salsa de Tomate Pomarola 200 g 6 un.",
+      "brand": "Pomarola",
+      "normalized_name": "pack pomarola salsa tomate pomarola 200 g 6 un.",
+      "locations": [
+        ""
+      ],
+      "prices": [],
+      "avg_price_per_unit": 0.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_77243": {
+      "product_id": "prod_77243",
+      "name": "Nonologin Papel Higiénico Confort Doble Hoja 25 m 24 un. Confort Confort",
+      "brand": "Confort",
+      "normalized_name": "nonologin papel higienico confort doble hoja 25 m 24 un. confort confort",
+      "locations": [
+        ""
+      ],
+      "prices": [],
+      "avg_price_per_unit": 0.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_64855": {
+      "product_id": "prod_64855",
+      "name": "Tecnologi Papel Higiénico Confort Doble Hoja 25 m 24 un. Confort Confort",
+      "brand": "Confort",
+      "normalized_name": "tecnologi papel higienico confort doble hoja 25 m 24 un. confort confort",
+      "locations": [
+        ""
+      ],
+      "prices": [],
+      "avg_price_per_unit": 0.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_41222": {
+      "product_id": "prod_41222",
+      "name": "protein Leche Soprole Proteína Natural 1 L",
+      "brand": "Soprole",
+      "normalized_name": "protein leche soprole proteina natural 1 l",
+      "locations": [
+        "PASILLO 10 ESTANTE 106"
+      ],
+      "prices": [
+        "$4.000 ($2000 uni)"
+      ],
+      "avg_price_per_unit": 2000.0,
+      "categories": [
+        "Limpieza y Hogar"
+      ],
+      "frequency": 4
+    },
+    "prod_94011": {
+      "product_id": "prod_94011",
+      "name": "Frutas y Verduras Palta Hass Malla 1 kg",
+      "brand": "Frutas y verduras Propias",
+      "normalized_name": "frutas verduras palta hass malla 1 kg",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$2.490 ($2490 uni)"
+      ],
+      "avg_price_per_unit": 2490.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_42158": {
+      "product_id": "prod_42158",
+      "name": "Esmeralda PALMITOS en Rodaja Palmitos en Rodajas Esmeralda 220 g",
+      "brand": "Esmeralda",
+      "normalized_name": "esmeralda palmitos rodaja pickeado palmitos rodajas esmeralda 220 g drenado",
+      "locations": [
+        "PASILLO 6 ESTANTE 56"
+      ],
+      "prices": [
+        "$3.990 ($1995 uni)"
+      ],
+      "avg_price_per_unit": 1995.0,
+      "categories": [
+        "Granos y Cereales"
+      ],
+      "frequency": 4
+    },
+    "prod_78410": {
+      "product_id": "prod_78410",
+      "name": "BENEDICTINO BLANCO MINI TOAST 90g Mini Tostadas Castaño 90 g",
+      "brand": "Castaño",
+      "normalized_name": "benedictino blanco mini toast 90g pickeado mini tostadas castano 90 g",
+      "locations": [
+        "PASILLO 6 ESTANTE 53"
+      ],
+      "prices": [
+        "$5.180 ($2590 uni)"
+      ],
+      "avg_price_per_unit": 2590.0,
+      "categories": [
+        "Granos y Cereales"
+      ],
+      "frequency": 4
+    },
+    "prod_53145": {
+      "product_id": "prod_53145",
+      "name": "SIN GAS 6,5 Stros Agua Benedictino Sin Gas Bidón 6.5 L",
+      "brand": "Benedictino",
+      "normalized_name": "gas 6,5 stros pickeado agua benedictino gas bidon 6.5 l",
+      "locations": [
+        "PASILLO 7 ESTANTE 65"
+      ],
+      "prices": [
+        "$1.890 ($1890 uni)"
+      ],
+      "avg_price_per_unit": 1890.0,
+      "categories": [
+        "Bebidas"
+      ],
+      "frequency": 2
+    },
+    "prod_30872": {
+      "product_id": "prod_30872",
+      "name": "Agua Benedictino Sin Gas Bidón 6.5 L",
+      "brand": "Benedictino",
+      "normalized_name": "pickeado agua benedictino gas bidon 6.5 l",
+      "locations": [
+        "PASILLO 7 ESTANTE 65"
+      ],
+      "prices": [
+        "$1.890 ($1890 uni)"
+      ],
+      "avg_price_per_unit": 1890.0,
+      "categories": [
+        "Bebidas"
+      ],
+      "frequency": 2
+    },
+    "prod_27821": {
+      "product_id": "prod_27821",
+      "name": "QUESO MANTECOSO LAMINADO PREMIUM 500g Queso Mantecoso Matthei Envasado Laminado 500 g",
+      "brand": "Matthei",
+      "normalized_name": "queso mantecoso laminado premium 500g pickeado queso mantecoso matthei envasado laminado 500 g",
+      "locations": [
+        ""
+      ],
+      "prices": [
+        "$5.453 ($5453 uni)"
+      ],
+      "avg_price_per_unit": 5453.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    },
+    "prod_96051": {
+      "product_id": "prod_96051",
+      "name": "FILETITOS AL NATURAL Filete de Pollo Natural 700 g",
+      "brand": "Super Pollo",
+      "normalized_name": "filetitos al natural pickeado filete pollo natural 700 g",
+      "locations": [
+        ""
+      ],
+      "prices": [],
+      "avg_price_per_unit": 0.0,
+      "categories": [
+        "Sin categoría"
+      ],
+      "frequency": 2
+    }
+  },
+  "brand_stats": {
+    "Vivo": {
+      "product_count": 1,
+      "total_frequency": 12,
+      "avg_frequency": 12.0,
+      "locations": [
+        "PASILLO 4 ESTANTE 72"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Banquete": {
+      "product_count": 1,
+      "total_frequency": 6,
+      "avg_frequency": 6.0,
+      "locations": [
+        "PASILLO 5 ESTANTE 90"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Cuisine & Co": {
+      "product_count": 7,
+      "total_frequency": 30,
+      "avg_frequency": 4.29,
+      "locations": [
+        "PASILLO 8 ESTANTE 81",
+        "PASILLO 4 ESTANTE 108",
+        "PASILLO 5 ESTANTE 87",
+        "PASILLO 4 ESTANTE 48"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Canada Dry": {
+      "product_count": 1,
+      "total_frequency": 10,
+      "avg_frequency": 10.0,
+      "locations": [
+        "PASILLO 7 ESTANTE 91"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Del Valle": {
+      "product_count": 3,
+      "total_frequency": 8,
+      "avg_frequency": 2.67,
+      "locations": [
+        "PASILLO 8 ESTANTE 68"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Loncoleche": {
+      "product_count": 2,
+      "total_frequency": 14,
+      "avg_frequency": 7.0,
+      "locations": [
+        "PASILLO 8 ESTANTE 89",
+        "PASILLO 10 ESTANTE 70"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Surlat": {
+      "product_count": 1,
+      "total_frequency": 2,
+      "avg_frequency": 2.0,
+      "locations": [
+        "PASILLO 10 ESTANTE 94"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Emubaby": {
+      "product_count": 1,
+      "total_frequency": 2,
+      "avg_frequency": 2.0,
+      "locations": [
+        "PASILLO 12 ESTANTE 45"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Frutas y Verduras Propias": {
+      "product_count": 3,
+      "total_frequency": 8,
+      "avg_frequency": 2.67,
+      "locations": [],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Soprole": {
+      "product_count": 8,
+      "total_frequency": 80,
+      "avg_frequency": 10.0,
+      "locations": [
+        "PASILLO 10 ESTANTE 106"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Sahne Nuss": {
+      "product_count": 2,
+      "total_frequency": 4,
+      "avg_frequency": 2.0,
+      "locations": [],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Savory": {
+      "product_count": 2,
+      "total_frequency": 4,
+      "avg_frequency": 2.0,
+      "locations": [],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "San José": {
+      "product_count": 2,
+      "total_frequency": 12,
+      "avg_frequency": 6.0,
+      "locations": [
+        "PASILLO 4 ESTANTE 42"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Chef": {
+      "product_count": 1,
+      "total_frequency": 2,
+      "avg_frequency": 2.0,
+      "locations": [
+        "PASILLO 4 ESTANTE 49"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Daily": {
+      "product_count": 1,
+      "total_frequency": 2,
+      "avg_frequency": 2.0,
+      "locations": [
+        "PASILLO 5 ESTANTE 56"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "lansa Cero K": {
+      "product_count": 1,
+      "total_frequency": 2,
+      "avg_frequency": 2.0,
+      "locations": [
+        "PASILLO 5 ESTANTE 58"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Cif": {
+      "product_count": 2,
+      "total_frequency": 6,
+      "avg_frequency": 3.0,
+      "locations": [
+        "PASILLO 9 ESTANTE 71",
+        "PASILLO 9 ESTANTE 69"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Clorox": {
+      "product_count": 1,
+      "total_frequency": 2,
+      "avg_frequency": 2.0,
+      "locations": [
+        "PASILLO 9 ESTANTE 93"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Costa": {
+      "product_count": 4,
+      "total_frequency": 56,
+      "avg_frequency": 14.0,
+      "locations": [
+        "PASILLO 7 ESTANTE 52",
+        "PASILLO 7 ESTANTE 54"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Austral": {
+      "product_count": 1,
+      "total_frequency": 12,
+      "avg_frequency": 12.0,
+      "locations": [
+        "PASILLO 1 ESTANTE 85"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Frutas y verduras Propias": {
+      "product_count": 5,
+      "total_frequency": 12,
+      "avg_frequency": 2.4,
+      "locations": [],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Matthei": {
+      "product_count": 2,
+      "total_frequency": 6,
+      "avg_frequency": 3.0,
+      "locations": [],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Frutos Del Maipo": {
+      "product_count": 1,
+      "total_frequency": 2,
+      "avg_frequency": 2.0,
+      "locations": [],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Minuto Verde": {
+      "product_count": 2,
+      "total_frequency": 4,
+      "avg_frequency": 2.0,
+      "locations": [],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Genérico": {
+      "product_count": 1,
+      "total_frequency": 8,
+      "avg_frequency": 8.0,
+      "locations": [
+        "PASILLO 1 ESTANTE 103"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Coca-Cola": {
+      "product_count": 2,
+      "total_frequency": 48,
+      "avg_frequency": 24.0,
+      "locations": [
+        "PASILLO 7 ESTANTE 105",
+        "PASILLO 7 ESTANTE 107"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Colun": {
+      "product_count": 2,
+      "total_frequency": 14,
+      "avg_frequency": 7.0,
+      "locations": [],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Dos en Uno": {
+      "product_count": 1,
+      "total_frequency": 2,
+      "avg_frequency": 2.0,
+      "locations": [
+        "PASILLO 7 ESTANTE 50"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Selz": {
+      "product_count": 1,
+      "total_frequency": 2,
+      "avg_frequency": 2.0,
+      "locations": [
+        "PASILLO 6 ESTANTE 81"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Virutex": {
+      "product_count": 1,
+      "total_frequency": 2,
+      "avg_frequency": 2.0,
+      "locations": [
+        "PASILLO 9 ESTANTE 98"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Kühne": {
+      "product_count": 1,
+      "total_frequency": 2,
+      "avg_frequency": 2.0,
+      "locations": [
+        "PASILLO 10 ESTANTE 48"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Favorita": {
+      "product_count": 1,
+      "total_frequency": 2,
+      "avg_frequency": 2.0,
+      "locations": [
+        "PASILLO 10 ESTANTE 47"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Fundo Los Alerces": {
+      "product_count": 1,
+      "total_frequency": 2,
+      "avg_frequency": 2.0,
+      "locations": [],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "La Crianza": {
+      "product_count": 2,
+      "total_frequency": 4,
+      "avg_frequency": 2.0,
+      "locations": [],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Krea": {
+      "product_count": 1,
+      "total_frequency": 2,
+      "avg_frequency": 2.0,
+      "locations": [],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Fuchs": {
+      "product_count": 1,
+      "total_frequency": 2,
+      "avg_frequency": 2.0,
+      "locations": [
+        "PASILLO 6 ESTANTE 49"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "La Granja": {
+      "product_count": 1,
+      "total_frequency": 2,
+      "avg_frequency": 2.0,
+      "locations": [
+        "PASILLO 8 ESTANTE 83"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Dole": {
+      "product_count": 2,
+      "total_frequency": 4,
+      "avg_frequency": 2.0,
+      "locations": [],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Super Pollo": {
+      "product_count": 2,
+      "total_frequency": 4,
+      "avg_frequency": 2.0,
+      "locations": [],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Malloa": {
+      "product_count": 1,
+      "total_frequency": 2,
+      "avg_frequency": 2.0,
+      "locations": [],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Alimentos Shen": {
+      "product_count": 1,
+      "total_frequency": 4,
+      "avg_frequency": 4.0,
+      "locations": [],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Yogu - Yogu": {
+      "product_count": 1,
+      "total_frequency": 2,
+      "avg_frequency": 2.0,
+      "locations": [
+        "PASILLO 10 ESTANTE 70"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Santa Ema": {
+      "product_count": 2,
+      "total_frequency": 4,
+      "avg_frequency": 2.0,
+      "locations": [
+        "PASILLO 1 ESTANTE 76",
+        "PASILLO 1 ESTANTE 66"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Home Care": {
+      "product_count": 3,
+      "total_frequency": 10,
+      "avg_frequency": 3.33,
+      "locations": [
+        "PASILLO 10 ESTANTE 85",
+        "PASILLO 9 ESTANTE 102"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Nosotras": {
+      "product_count": 2,
+      "total_frequency": 6,
+      "avg_frequency": 3.0,
+      "locations": [
+        "PASILLO 11 ESTANTE 69",
+        "PASILLO 11 ESTANTE 71"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Ladysoft": {
+      "product_count": 1,
+      "total_frequency": 6,
+      "avg_frequency": 6.0,
+      "locations": [
+        "PASILLO 11 ESTANTE 67"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "NoGlut": {
+      "product_count": 1,
+      "total_frequency": 2,
+      "avg_frequency": 2.0,
+      "locations": [
+        "PASILLO 6 ESTANTE 50"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Regimel": {
+      "product_count": 2,
+      "total_frequency": 4,
+      "avg_frequency": 2.0,
+      "locations": [],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Pomarola": {
+      "product_count": 1,
+      "total_frequency": 2,
+      "avg_frequency": 2.0,
+      "locations": [],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Confort": {
+      "product_count": 2,
+      "total_frequency": 4,
+      "avg_frequency": 2.0,
+      "locations": [],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Esmeralda": {
+      "product_count": 1,
+      "total_frequency": 4,
+      "avg_frequency": 4.0,
+      "locations": [
+        "PASILLO 6 ESTANTE 56"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Castaño": {
+      "product_count": 1,
+      "total_frequency": 4,
+      "avg_frequency": 4.0,
+      "locations": [
+        "PASILLO 6 ESTANTE 53"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    },
+    "Benedictino": {
+      "product_count": 2,
+      "total_frequency": 4,
+      "avg_frequency": 2.0,
+      "locations": [
+        "PASILLO 7 ESTANTE 65"
+      ],
+      "price_range": [],
+      "min_price": 0,
+      "max_price": 0,
+      "avg_price": 0
+    }
+  },
+  "location_stats": {
+    "PASILLO 4 ESTANTE 72": {
+      "product_count": 1,
+      "brands": [
+        "Vivo"
+      ],
+      "total_frequency": 12
+    },
+    "PASILLO 5 ESTANTE 90": {
+      "product_count": 1,
+      "brands": [
+        "Banquete"
+      ],
+      "total_frequency": 6
+    },
+    "PASILLO 4 ESTANTE 108": {
+      "product_count": 1,
+      "brands": [
+        "Cuisine & Co"
+      ],
+      "total_frequency": 2
+    },
+    "PASILLO 7 ESTANTE 91": {
+      "product_count": 1,
+      "brands": [
+        "Canada Dry"
+      ],
+      "total_frequency": 10
+    },
+    "PASILLO 8 ESTANTE 68": {
+      "product_count": 3,
+      "brands": [
+        "Del Valle"
+      ],
+      "total_frequency": 8
+    },
+    "PASILLO 10 ESTANTE 70": {
+      "product_count": 2,
+      "brands": [
+        "Yogu - Yogu",
+        "Loncoleche"
+      ],
+      "total_frequency": 10
+    },
+    "PASILLO 10 ESTANTE 94": {
+      "product_count": 1,
+      "brands": [
+        "Surlat"
+      ],
+      "total_frequency": 2
+    },
+    "PASILLO 12 ESTANTE 45": {
+      "product_count": 1,
+      "brands": [
+        "Emubaby"
+      ],
+      "total_frequency": 2
+    },
+    "PASILLO 4 ESTANTE 42": {
+      "product_count": 2,
+      "brands": [
+        "San José"
+      ],
+      "total_frequency": 12
+    },
+    "PASILLO 4 ESTANTE 49": {
+      "product_count": 1,
+      "brands": [
+        "Chef"
+      ],
+      "total_frequency": 2
+    },
+    "PASILLO 5 ESTANTE 56": {
+      "product_count": 1,
+      "brands": [
+        "Daily"
+      ],
+      "total_frequency": 2
+    },
+    "PASILLO 5 ESTANTE 58": {
+      "product_count": 1,
+      "brands": [
+        "lansa Cero K"
+      ],
+      "total_frequency": 2
+    },
+    "PASILLO 9 ESTANTE 71": {
+      "product_count": 1,
+      "brands": [
+        "Cif"
+      ],
+      "total_frequency": 4
+    },
+    "PASILLO 9 ESTANTE 69": {
+      "product_count": 1,
+      "brands": [
+        "Cif"
+      ],
+      "total_frequency": 2
+    },
+    "PASILLO 9 ESTANTE 93": {
+      "product_count": 1,
+      "brands": [
+        "Clorox"
+      ],
+      "total_frequency": 2
+    },
+    "PASILLO 7 ESTANTE 54": {
+      "product_count": 2,
+      "brands": [
+        "Costa"
+      ],
+      "total_frequency": 40
+    },
+    "PASILLO 1 ESTANTE 85": {
+      "product_count": 1,
+      "brands": [
+        "Austral"
+      ],
+      "total_frequency": 12
+    },
+    "PASILLO 1 ESTANTE 103": {
+      "product_count": 1,
+      "brands": [
+        "Genérico"
+      ],
+      "total_frequency": 8
+    },
+    "PASILLO 7 ESTANTE 105": {
+      "product_count": 1,
+      "brands": [
+        "Coca-Cola"
+      ],
+      "total_frequency": 24
+    },
+    "PASILLO 7 ESTANTE 107": {
+      "product_count": 1,
+      "brands": [
+        "Coca-Cola"
+      ],
+      "total_frequency": 24
+    },
+    "PASILLO 7 ESTANTE 50": {
+      "product_count": 1,
+      "brands": [
+        "Dos en Uno"
+      ],
+      "total_frequency": 2
+    },
+    "PASILLO 6 ESTANTE 81": {
+      "product_count": 1,
+      "brands": [
+        "Selz"
+      ],
+      "total_frequency": 2
+    },
+    "PASILLO 9 ESTANTE 98": {
+      "product_count": 1,
+      "brands": [
+        "Virutex"
+      ],
+      "total_frequency": 2
+    },
+    "PASILLO 10 ESTANTE 48": {
+      "product_count": 1,
+      "brands": [
+        "Kühne"
+      ],
+      "total_frequency": 2
+    },
+    "PASILLO 10 ESTANTE 47": {
+      "product_count": 1,
+      "brands": [
+        "Favorita"
+      ],
+      "total_frequency": 2
+    },
+    "PASILLO 6 ESTANTE 49": {
+      "product_count": 1,
+      "brands": [
+        "Fuchs"
+      ],
+      "total_frequency": 2
+    },
+    "PASILLO 8 ESTANTE 83": {
+      "product_count": 1,
+      "brands": [
+        "La Granja"
+      ],
+      "total_frequency": 2
+    },
+    "PASILLO 5 ESTANTE 87": {
+      "product_count": 1,
+      "brands": [
+        "Cuisine & Co"
+      ],
+      "total_frequency": 8
+    },
+    "PASILLO 8 ESTANTE 81": {
+      "product_count": 1,
+      "brands": [
+        "Cuisine & Co"
+      ],
+      "total_frequency": 2
+    },
+    "PASILLO 1 ESTANTE 66": {
+      "product_count": 1,
+      "brands": [
+        "Santa Ema"
+      ],
+      "total_frequency": 2
+    },
+    "PASILLO 1 ESTANTE 76": {
+      "product_count": 1,
+      "brands": [
+        "Santa Ema"
+      ],
+      "total_frequency": 2
+    },
+    "PASILLO 8 ESTANTE 89": {
+      "product_count": 1,
+      "brands": [
+        "Loncoleche"
+      ],
+      "total_frequency": 6
+    },
+    "PASILLO 9 ESTANTE 102": {
+      "product_count": 1,
+      "brands": [
+        "Home Care"
+      ],
+      "total_frequency": 2
+    },
+    "PASILLO 10 ESTANTE 85": {
+      "product_count": 2,
+      "brands": [
+        "Home Care"
+      ],
+      "total_frequency": 8
+    },
+    "PASILLO 11 ESTANTE 71": {
+      "product_count": 1,
+      "brands": [
+        "Nosotras"
+      ],
+      "total_frequency": 4
+    },
+    "PASILLO 11 ESTANTE 69": {
+      "product_count": 1,
+      "brands": [
+        "Nosotras"
+      ],
+      "total_frequency": 2
+    },
+    "PASILLO 11 ESTANTE 67": {
+      "product_count": 1,
+      "brands": [
+        "Ladysoft"
+      ],
+      "total_frequency": 6
+    },
+    "PASILLO 6 ESTANTE 50": {
+      "product_count": 1,
+      "brands": [
+        "NoGlut"
+      ],
+      "total_frequency": 2
+    },
+    "PASILLO 4 ESTANTE 48": {
+      "product_count": 1,
+      "brands": [
+        "Cuisine & Co"
+      ],
+      "total_frequency": 6
+    },
+    "PASILLO 7 ESTANTE 52": {
+      "product_count": 1,
+      "brands": [
+        "Costa"
+      ],
+      "total_frequency": 4
+    },
+    "PASILLO 10 ESTANTE 106": {
+      "product_count": 1,
+      "brands": [
+        "Soprole"
+      ],
+      "total_frequency": 4
+    },
+    "PASILLO 6 ESTANTE 56": {
+      "product_count": 1,
+      "brands": [
+        "Esmeralda"
+      ],
+      "total_frequency": 4
+    },
+    "PASILLO 6 ESTANTE 53": {
+      "product_count": 1,
+      "brands": [
+        "Castaño"
+      ],
+      "total_frequency": 4
+    },
+    "PASILLO 7 ESTANTE 65": {
+      "product_count": 2,
+      "brands": [
+        "Benedictino"
+      ],
+      "total_frequency": 4
+    }
+  },
+  "price_ranges": {},
+  "summary": {
+    "total_products": 96,
+    "total_brands": 53,
+    "total_locations": 44,
+    "total_frequency": 456
+  }
+}

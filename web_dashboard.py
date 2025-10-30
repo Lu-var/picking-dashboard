@@ -362,6 +362,159 @@ def records_detailed():
         'weekly_comparison': weeks
     })
 
+@app.route('/api/products/search')
+def search_products():
+    """Search products in the database"""
+    from flask import request
+    query = request.args.get('q', '')
+    limit = int(request.args.get('limit', 20))
+    
+    try:
+        # Load product database
+        with open('data/product_database.json', 'r', encoding='utf-8') as f:
+            db = json.load(f)
+        
+        # Simple search through products
+        results = []
+        query_lower = query.lower()
+        
+        for product in db['products'].values():
+            if (query_lower in product['name'].lower() or 
+                query_lower in product['brand'].lower() or
+                any(query_lower in cat.lower() for cat in product['categories'])):
+                results.append(product)
+        
+        # Sort by frequency (most popular first)
+        results.sort(key=lambda x: x['frequency'], reverse=True)
+        
+        return jsonify(results[:limit])
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/products/brands')
+def get_brands():
+    """Get brand statistics"""
+    try:
+        with open('data/product_database.json', 'r', encoding='utf-8') as f:
+            db = json.load(f)
+        
+        # Sort brands by product count
+        brands = sorted(db['brand_stats'].items(), 
+                       key=lambda x: x[1]['product_count'], 
+                       reverse=True)
+        
+        return jsonify({
+            'brands': dict(brands),
+            'total_brands': len(brands)
+        })
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/products/locations')
+def get_locations():
+    """Get location statistics"""
+    try:
+        with open('data/product_database.json', 'r', encoding='utf-8') as f:
+            db = json.load(f)
+        
+        return jsonify(db['location_stats'])
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/products/by-location')
+def products_by_location():
+    """Get products from a specific location"""
+    from flask import request
+    location = request.args.get('location', '')
+    
+    try:
+        with open('data/product_database.json', 'r', encoding='utf-8') as f:
+            db = json.load(f)
+        
+        # Find products in the specified location
+        products = []
+        for product in db['products'].values():
+            if location in product['locations']:
+                products.append(product)
+        
+        # Sort by frequency
+        products.sort(key=lambda x: x['frequency'], reverse=True)
+        
+        return jsonify({
+            'location': location,
+            'products': products,
+            'count': len(products)
+        })
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/products/browse')
+def browse_all_products():
+    """Browse all products with sorting and pagination"""
+    from flask import request
+    
+    # Get parameters
+    sort_by = request.args.get('sort', 'name')  # name, brand, frequency, price
+    order = request.args.get('order', 'asc')    # asc, desc
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 20))
+    
+    try:
+        with open('data/product_database.json', 'r', encoding='utf-8') as f:
+            db = json.load(f)
+        
+        # Convert products dict to list
+        products = list(db['products'].values())
+        
+        # Sort products
+        if sort_by == 'name':
+            products.sort(key=lambda x: x['name'].lower(), reverse=(order == 'desc'))
+        elif sort_by == 'brand':
+            products.sort(key=lambda x: x['brand'].lower(), reverse=(order == 'desc'))
+        elif sort_by == 'frequency':
+            products.sort(key=lambda x: x['frequency'], reverse=(order == 'desc'))
+        elif sort_by == 'price':
+            products.sort(key=lambda x: x['avg_price_per_unit'], reverse=(order == 'desc'))
+        
+        # Paginate
+        total = len(products)
+        start = (page - 1) * per_page
+        end = start + per_page
+        paginated_products = products[start:end]
+        
+        return jsonify({
+            'products': paginated_products,
+            'pagination': {
+                'page': page,
+                'per_page': per_page,
+                'total': total,
+                'pages': (total + per_page - 1) // per_page
+            },
+            'sort': {
+                'by': sort_by,
+                'order': order
+            }
+        })
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/products/database')
+def get_product_database():
+    """Get full product database summary"""
+    try:
+        with open('data/product_database.json', 'r', encoding='utf-8') as f:
+            db = json.load(f)
+        
+        return jsonify(db['summary'])
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/layout')
 def get_layout():
     """Serve darkstore layout data"""
