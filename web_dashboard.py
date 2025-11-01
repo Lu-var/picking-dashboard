@@ -21,7 +21,7 @@ def get_sheet_url():
 
 def load_data():
     """Fetch latest data from Google Sheets"""
-    response = requests.get(get_sheet_url())
+    response = requests.get(get_sheet_url(), timeout=10)
     response.raise_for_status()
     
     df = pd.read_csv(StringIO(response.text))
@@ -48,7 +48,7 @@ def load_data():
     
     # Filter out ignored orders for performance metrics
     # Treat NaN as False (don't ignore), only filter out explicit True values
-    df['Ignorar'] = df['Ignorar'].fillna(False).infer_objects(copy=False)
+    df['Ignorar'] = df['Ignorar'].fillna(False)
     df_filtered = df[df['Ignorar'] == False].copy()
     
     return df, df_filtered
@@ -95,7 +95,10 @@ def today_stats():
     
     # Calculate earnings (use ALL orders including ignored)
     today_all = df[df['Fecha'].dt.date == today].copy()
-    today_all.loc[:, 'earnings'] = today_all.apply(calculate_earnings, axis=1)
+    earnings = []
+    for _, row in today_all.iterrows():
+        earnings.append(calculate_earnings(row))
+    today_all['earnings'] = earnings
     earned = today_all['earnings'].sum()
     
     return jsonify({
@@ -132,7 +135,10 @@ def week_stats():
     
     # Calculate earnings
     week_all = df[(df['Fecha'].dt.date >= week_start) & (df['Fecha'].dt.date <= today)].copy()
-    week_all.loc[:, 'earnings'] = week_all.apply(calculate_earnings, axis=1)
+    earnings = []
+    for _, row in week_all.iterrows():
+        earnings.append(calculate_earnings(row))
+    week_all['earnings'] = earnings
     earned = week_all['earnings'].sum()
     
     return jsonify({
@@ -218,7 +224,10 @@ def month_stats():
     
     # Calculate total earnings
     month_complete = month_complete.copy()
-    month_complete.loc[:, 'earnings'] = month_complete.apply(calculate_earnings, axis=1)
+    earnings = []
+    for _, row in month_complete.iterrows():
+        earnings.append(calculate_earnings(row))
+    month_complete['earnings'] = earnings
     total_earned = int(month_complete['earnings'].sum())
     
     return jsonify({
@@ -290,7 +299,10 @@ def all_time_stats():
     
     # Calculate total earnings from all orders
     df = df.copy()
-    df.loc[:, 'earnings'] = df.apply(calculate_earnings, axis=1)
+    earnings = []
+    for _, row in df.iterrows():
+        earnings.append(calculate_earnings(row))
+    df['earnings'] = earnings
     total_earned = int(df['earnings'].sum())
     
     # Total stats
