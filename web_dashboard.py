@@ -47,7 +47,8 @@ def load_data():
     df['Tiempo_mins'] = df['Tiempo'].apply(parse_time)
     
     # Filter out ignored orders for performance metrics
-    # Your sheet uses False/True, not 'IGN'
+    # Treat NaN as False (don't ignore), only filter out explicit True values
+    df['Ignorar'] = df['Ignorar'].fillna(False).infer_objects(copy=False)
     df_filtered = df[df['Ignorar'] == False].copy()
     
     return df, df_filtered
@@ -93,8 +94,8 @@ def today_stats():
     speed = (total_skus / total_time * 60) if total_time > 0 else 0
     
     # Calculate earnings (use ALL orders including ignored)
-    today_all = df[df['Fecha'].dt.date == today]
-    today_all['earnings'] = today_all.apply(calculate_earnings, axis=1)
+    today_all = df[df['Fecha'].dt.date == today].copy()
+    today_all.loc[:, 'earnings'] = today_all.apply(calculate_earnings, axis=1)
     earned = today_all['earnings'].sum()
     
     return jsonify({
@@ -130,8 +131,8 @@ def week_stats():
     speed = (total_skus / total_time * 60) if total_time > 0 else 0
     
     # Calculate earnings
-    week_all = df[(df['Fecha'].dt.date >= week_start) & (df['Fecha'].dt.date <= today)]
-    week_all['earnings'] = week_all.apply(calculate_earnings, axis=1)
+    week_all = df[(df['Fecha'].dt.date >= week_start) & (df['Fecha'].dt.date <= today)].copy()
+    week_all.loc[:, 'earnings'] = week_all.apply(calculate_earnings, axis=1)
     earned = week_all['earnings'].sum()
     
     return jsonify({
@@ -216,7 +217,8 @@ def month_stats():
     speed = (total_skus / total_time * 60) if total_time > 0 else 0
     
     # Calculate total earnings
-    month_complete['earnings'] = month_complete.apply(calculate_earnings, axis=1)
+    month_complete = month_complete.copy()
+    month_complete.loc[:, 'earnings'] = month_complete.apply(calculate_earnings, axis=1)
     total_earned = int(month_complete['earnings'].sum())
     
     return jsonify({
@@ -287,7 +289,8 @@ def all_time_stats():
     df, df_filtered = load_data()
     
     # Calculate total earnings from all orders
-    df['earnings'] = df.apply(calculate_earnings, axis=1)
+    df = df.copy()
+    df.loc[:, 'earnings'] = df.apply(calculate_earnings, axis=1)
     total_earned = int(df['earnings'].sum())
     
     # Total stats
