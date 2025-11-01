@@ -48,7 +48,7 @@ def load_data():
     
     # Filter out ignored orders for performance metrics
     # Treat NaN as False (don't ignore), only filter out explicit True values
-    df['Ignorar'] = df['Ignorar'].fillna(False)
+    df.loc[df['Ignorar'].isna(), 'Ignorar'] = False
     df_filtered = df[df['Ignorar'] == False].copy()
     
     return df, df_filtered
@@ -539,6 +539,297 @@ def get_layout():
         return jsonify(layout_data)
     except FileNotFoundError:
         return jsonify({'error': 'Layout file not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# New Orders Management API
+@app.route('/api/orders/daily')
+def daily_orders():
+    """Get orders grouped by day"""
+    try:
+        df, df_filtered = load_data()
+        
+        # Group orders by date
+        daily_data = []
+        dates = df_filtered['Fecha'].dt.date.unique()
+        dates = sorted([d for d in dates if pd.notna(d)], reverse=True)
+        
+        for date in dates:
+            day_orders = df_filtered[df_filtered['Fecha'].dt.date == date]
+            
+            # Calculate earnings for the day
+            earnings = []
+            for _, row in day_orders.iterrows():
+                earnings.append(calculate_earnings(row))
+            
+            daily_data.append({
+                'date': date.strftime('%Y-%m-%d'),
+                'date_formatted': date.strftime('%d/%m/%Y'),
+                'weekday': date.strftime('%A'),
+                'orders_count': len(day_orders),
+                'total_skus': int(day_orders['SKUs'].sum()),
+                'total_time_mins': int(day_orders['Tiempo_mins'].sum()),
+                'total_earned': sum(earnings),
+                'avg_skus_per_order': round(day_orders['SKUs'].mean(), 1) if len(day_orders) > 0 else 0,
+                'speed': round((day_orders['SKUs'].sum() / day_orders['Tiempo_mins'].sum() * 60), 1) if day_orders['Tiempo_mins'].sum() > 0 else 0,
+                'orders': [
+                    {
+                        'cliente': row['Cliente'],
+                        'skus': int(row['SKUs']),
+                        'tiempo': row['Tiempo'],
+                        'tiempo_mins': int(row['Tiempo_mins']),
+                        'earnings': calculate_earnings(row)
+                    }
+                    for _, row in day_orders.iterrows()
+                ]
+            })
+        
+        return jsonify(daily_data)
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/orders/monthly')
+def monthly_orders():
+    """Get orders grouped by month"""
+    try:
+        df, df_filtered = load_data()
+        
+        # Group orders by month
+        df_filtered['year_month'] = df_filtered['Fecha'].dt.to_period('M')
+        monthly_data = []
+        
+        months = df_filtered['year_month'].unique()
+        months = sorted([m for m in months if pd.notna(m)], reverse=True)
+        
+        for month in months:
+            month_orders = df_filtered[df_filtered['year_month'] == month]
+            
+            # Calculate earnings for the month
+            earnings = []
+            for _, row in month_orders.iterrows():
+                earnings.append(calculate_earnings(row))
+            
+            # Group by days in the month
+            daily_breakdown = []
+            days = month_orders['Fecha'].dt.date.unique()
+            days = sorted([d for d in days if pd.notna(d)])
+            
+            for day in days:
+                day_orders = month_orders[month_orders['Fecha'].dt.date == day]
+                day_earnings = []
+                for _, row in day_orders.iterrows():
+                    day_earnings.append(calculate_earnings(row))
+                
+                daily_breakdown.append({
+                    'date': day.strftime('%Y-%m-%d'),
+                    'date_formatted': day.strftime('%d/%m'),
+                    'weekday': day.strftime('%a'),
+                    'orders_count': len(day_orders),
+                    'total_skus': int(day_orders['SKUs'].sum()),
+                    'total_earned': sum(day_earnings)
+                })
+            
+            monthly_data.append({
+                'month': str(month),
+                'month_formatted': month.strftime('%B %Y'),
+                'orders_count': len(month_orders),
+                'total_skus': int(month_orders['SKUs'].sum()),
+                'total_time_mins': int(month_orders['Tiempo_mins'].sum()),
+                'total_earned': sum(earnings),
+                'avg_skus_per_order': round(month_orders['SKUs'].mean(), 1) if len(month_orders) > 0 else 0,
+                'speed': round((month_orders['SKUs'].sum() / month_orders['Tiempo_mins'].sum() * 60), 1) if month_orders['Tiempo_mins'].sum() > 0 else 0,
+                'working_days': len(days),
+                'daily_breakdown': daily_breakdown
+            })
+        
+        return jsonify(monthly_data)
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Enhanced Product Browsing API
+@app.route('/api/products/enhanced/by-brand')
+def enhanced_products_by_brand():
+    """Get products organized by brand with expandable structure"""
+    try:
+        from tools.product_database import ProductDatabase
+        
+        with open('data/product_database.json', 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        products = data['products']
+        brand_stats = data['brand_stats']
+        
+        # Organize products by brand
+        brands_data = []
+        for brand, stats in sorted(brand_stats.items()):
+            brand_products = []
+            
+            for product_id, product in products.items():
+                if product['brand'] == brand:
+                    brand_products.append({
+                        'id': product_id,
+                        'name': product['name'],
+                        'frequency': product['frequency'],
+                        'locations': product['locations'],
+                        'prices': product['prices'],
+                        'categories': product.get('categories', []),
+                        'avg_price': product.get('avg_price_per_unit', 0)
+                    })
+            
+            # Sort products by frequency (most picked first)
+            brand_products.sort(key=lambda x: x['frequency'], reverse=True)
+            
+            brands_data.append({
+                'brand': brand,
+                'product_count': stats['product_count'],
+                'total_frequency': stats['total_frequency'],
+                'avg_frequency': stats['avg_frequency'],
+                'locations_count': len(stats['locations']),
+                'price_range': {
+                    'min': stats.get('min_price', 0),
+                    'max': stats.get('max_price', 0),
+                    'avg': stats.get('avg_price', 0)
+                },
+                'products': brand_products
+            })
+        
+        # Sort brands by total frequency (most active brands first)
+        brands_data.sort(key=lambda x: x['total_frequency'], reverse=True)
+        
+        return jsonify(brands_data)
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/products/enhanced/by-location')
+def enhanced_products_by_location():
+    """Get products organized by location/shelf with expandable structure"""
+    try:
+        with open('data/product_database.json', 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        products = data['products']
+        location_stats = data['location_stats']
+        
+        # Organize products by location
+        locations_data = []
+        for location, stats in sorted(location_stats.items()):
+            if not location.strip():  # Skip empty locations
+                continue
+                
+            location_products = []
+            
+            for product_id, product in products.items():
+                if location in product['locations']:
+                    location_products.append({
+                        'id': product_id,
+                        'name': product['name'],
+                        'brand': product['brand'],
+                        'frequency': product['frequency'],
+                        'prices': product['prices'],
+                        'categories': product.get('categories', []),
+                        'avg_price': product.get('avg_price_per_unit', 0)
+                    })
+            
+            # Sort products by frequency (most picked first)
+            location_products.sort(key=lambda x: x['frequency'], reverse=True)
+            
+            # Parse location for better organization
+            location_parts = location.split()
+            pasillo = None
+            estante = None
+            
+            if len(location_parts) >= 3:
+                if location_parts[0] == 'PASILLO':
+                    pasillo = location_parts[1]
+                if len(location_parts) >= 3 and location_parts[2] == 'ESTANTE':
+                    estante = location_parts[3] if len(location_parts) > 3 else None
+            
+            locations_data.append({
+                'location': location,
+                'pasillo': pasillo,
+                'estante': estante,
+                'product_count': stats['product_count'],
+                'brands_count': len(stats['brands']),
+                'total_frequency': stats['total_frequency'],
+                'brands': list(stats['brands']),
+                'products': location_products
+            })
+        
+        # Sort locations by pasillo and estante
+        def location_sort_key(loc):
+            pasillo = int(loc['pasillo']) if loc['pasillo'] and loc['pasillo'].isdigit() else 999
+            estante = int(loc['estante']) if loc['estante'] and loc['estante'].isdigit() else 999
+            return (pasillo, estante)
+        
+        locations_data.sort(key=location_sort_key)
+        
+        return jsonify(locations_data)
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/products/enhanced/by-category')
+def enhanced_products_by_category():
+    """Get products organized by category with expandable structure"""
+    try:
+        with open('data/product_database.json', 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        products = data['products']
+        
+        # Organize products by category
+        categories_data = {}
+        
+        for product_id, product in products.items():
+            categories = product.get('categories', ['Uncategorized'])
+            
+            for category in categories:
+                if category not in categories_data:
+                    categories_data[category] = {
+                        'category': category,
+                        'product_count': 0,
+                        'total_frequency': 0,
+                        'brands': set(),
+                        'locations': set(),
+                        'products': []
+                    }
+                
+                categories_data[category]['product_count'] += 1
+                categories_data[category]['total_frequency'] += product['frequency']
+                categories_data[category]['brands'].add(product['brand'])
+                categories_data[category]['locations'].update(product['locations'])
+                
+                categories_data[category]['products'].append({
+                    'id': product_id,
+                    'name': product['name'],
+                    'brand': product['brand'],
+                    'frequency': product['frequency'],
+                    'locations': product['locations'],
+                    'prices': product['prices'],
+                    'avg_price': product.get('avg_price_per_unit', 0)
+                })
+        
+        # Convert to list and clean up sets
+        categories_list = []
+        for category, data in categories_data.items():
+            data['brands'] = list(data['brands'])
+            data['locations'] = list(data['locations'])
+            data['brands_count'] = len(data['brands'])
+            data['locations_count'] = len(data['locations'])
+            
+            # Sort products by frequency
+            data['products'].sort(key=lambda x: x['frequency'], reverse=True)
+            
+            categories_list.append(data)
+        
+        # Sort categories by total frequency
+        categories_list.sort(key=lambda x: x['total_frequency'], reverse=True)
+        
+        return jsonify(categories_list)
+    
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

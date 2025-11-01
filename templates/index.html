@@ -64,6 +64,52 @@ body{font-family:system-ui,sans-serif;background:linear-gradient(135deg,#0f172a,
 .tab-secondary.active{background:rgba(59,130,246,0.2);color:#3b82f6;border-color:rgba(59,130,246,0.3)}
 .pagination-btn{padding:8px 16px;border-radius:8px;background:rgba(59,130,246,0.1);color:#3b82f6;border:1px solid rgba(59,130,246,0.3);cursor:pointer;font-size:13px}
 .pagination-btn:hover{background:rgba(59,130,246,0.2)}
+.expandable-section{background:rgba(15,23,42,0.5);border-radius:12px;margin-bottom:12px;overflow:hidden;border:1px solid rgba(100,116,139,0.2)}
+.section-header{padding:16px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:background 0.2s}
+.section-header:hover{background:rgba(59,130,246,0.1)}
+.expand-icon{font-size:14px;color:#3b82f6}
+.section-info{flex:1;display:flex;align-items:center;gap:12px}
+.section-details{flex:1}
+.section-title{font-weight:600;color:#f1f5f9;margin-bottom:4px}
+.section-stats{color:#94a3b8;font-size:13px;margin-bottom:2px}
+.section-price,.section-brands{color:#3b82f6;font-size:12px}
+.expanded-content{padding:0 16px 16px;border-top:1px solid rgba(100,116,139,0.1)}
+.product-item-mini{background:rgba(30,41,59,0.5);padding:12px;border-radius:8px;margin:8px 0;border-left:2px solid #3b82f6}
+.product-item-mini .product-name{font-weight:500;color:#f1f5f9;font-size:14px;margin-bottom:4px}
+.product-item-mini .product-brand{color:#3b82f6;font-weight:600;font-size:12px;margin-bottom:2px}
+.product-item-mini .product-details{color:#94a3b8;font-size:12px}
+.more-items{text-align:center;color:#64748b;font-style:italic;padding:8px;font-size:12px}
+.order-item-card{background:rgba(15,23,42,0.5);padding:14px;border-radius:10px;margin-bottom:10px;border-left:3px solid #10b981}
+.order-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.order-cliente{font-weight:600;color:#f1f5f9}
+.order-speed-badge{background:rgba(16,185,129,0.2);color:#10b981;padding:4px 8px;border-radius:6px;font-size:12px;font-weight:600}
+.order-list-container{max-height:400px;overflow-y:auto}
+.day-summary{background:rgba(15,23,42,0.5);padding:14px;border-radius:10px;margin-bottom:8px;cursor:pointer;border-left:3px solid #3b82f6;transition:all 0.2s}
+.day-summary:hover{background:rgba(59,130,246,0.1)}
+.day-summary.expanded{border-left-color:#10b981}
+.day-header{display:flex;justify-content:space-between;align-items:center}
+.day-date{font-weight:600;color:#f1f5f9;font-size:14px}
+.day-stats{color:#94a3b8;font-size:12px;margin-top:2px}
+.day-speed{color:#3b82f6;font-weight:600}
+.expanded-orders{margin-top:12px;padding-top:12px;border-top:1px solid rgba(100,116,139,0.2)}
+.order-detail{background:rgba(30,41,59,0.3);padding:10px;border-radius:6px;margin:6px 0;font-size:13px}
+.order-stats{display:flex;gap:12px;margin-top:4px;color:#94a3b8;font-size:11px}
+.month-summary{background:rgba(15,23,42,0.5);padding:16px;border-radius:12px;margin-bottom:12px;border-left:4px solid #8b5cf6}
+.month-header{margin-bottom:12px}
+.month-title{font-weight:700;color:#f1f5f9;font-size:16px;margin-bottom:6px}
+.month-totals{color:#94a3b8;font-size:13px;margin-bottom:6px}
+.month-metrics{display:flex;gap:16px;color:#8b5cf6;font-size:12px;font-weight:600}
+.daily-breakdown{display:grid;grid-template-columns:repeat(auto-fit,minmax(60px,1fr));gap:4px}
+.mini-day{background:rgba(30,41,59,0.4);padding:6px;border-radius:4px;text-align:center}
+.mini-date{font-size:11px;font-weight:600;color:#f1f5f9}
+.mini-stats{font-size:10px;color:#94a3b8}
+.category-card{background:rgba(15,23,42,0.5);padding:16px;border-radius:12px;margin-bottom:12px;border-left:4px solid #f59e0b}
+.category-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.category-icon{font-size:24px}
+.category-title{font-weight:600;color:#f1f5f9;font-size:15px;margin-bottom:4px}
+.category-stats{color:#94a3b8;font-size:12px}
+.category-preview{border-top:1px solid rgba(100,116,139,0.1);padding-top:12px}
+.mini-product{background:rgba(30,41,59,0.3);padding:8px;border-radius:6px;margin:4px 0;font-size:12px;color:#e2e8f0}
 </style>
 </head>
 <body>
@@ -98,9 +144,353 @@ async function fetchLayout(){try{const r=await fetch('/api/layout');layoutData=a
 async function fetchRecords(){try{const r=await fetch('/api/records_detailed');recordsData=await r.json();renderDashboard(cachedData);}catch(e){console.error('Error loading records:',e);}}
 function renderDashboard(d){const {today,week,month,recent,stats,bests,allTime}=d;const c=document.getElementById('content');let h='';if(currentSection==='overview'){h=renderOverview(today,week,month,stats,allTime,recordsData);}else if(currentSection==='records'){h=recordsData?renderRecords(bests,recordsData):`<div class="section active"><div class="card"><div class="card-title">Records Personales</div>${bests.fastest_order?`<div class="best-item"><div class="best-title">Más Rápido</div><div class="best-value">${bests.fastest_order.time} mins</div><div class="best-details">${bests.fastest_order.skus} SKUs - ${bests.fastest_order.cliente}</div></div>`:''}${bests.most_skus?`<div class="best-item"><div class="best-title">Más SKUs</div><div class="best-value">${bests.most_skus.skus} SKUs</div><div class="best-details">${bests.most_skus.time} mins - ${bests.most_skus.cliente}</div></div>`:''}${bests.best_speed?`<div class="best-item"><div class="best-title">Mejor Velocidad</div><div class="best-value">${bests.best_speed.speed} SKUs/h</div><div class="best-details">${bests.best_speed.skus} SKUs - ${bests.best_speed.cliente}</div></div>`:''}  </div><div class="loading">Cargando análisis detallado...</div></div>`;}else if(currentSection==='orders'){h=renderOrders(recent,recordsData);}else if(currentSection==='products'){h=productData?renderProducts(productData):'<div class="loading">Cargando base de datos de productos...</div>';}else if(currentSection==='map'){h=layoutData?renderMap(layoutData):'<div class="loading">Cargando mapa...</div>';}c.innerHTML=h;}
 function renderOverview(today,week,month,stats,allTime,records){let html='<div class="section active">';html+='<div class="card"><div class="card-title">Hoy</div><div class="stats-grid">';html+=`<div class="stat"><div class="stat-label">Pedidos</div><div class="stat-value highlight">${today.orders}</div></div>`;html+=`<div class="stat"><div class="stat-label">SKUs</div><div class="stat-value">${today.skus}</div></div>`;html+=`<div class="stat"><div class="stat-label">Velocidad</div><div class="stat-value success">${today.speed}</div></div>`;html+=`<div class="stat"><div class="stat-label">Ganado</div><div class="stat-value highlight">$${today.earned.toLocaleString()}</div></div>`;html+='</div></div>';html+='<div class="card"><div class="card-title">Esta Semana</div><div class="stats-grid">';html+=`<div class="stat"><div class="stat-label">Pedidos</div><div class="stat-value">${week.orders}</div></div>`;html+=`<div class="stat"><div class="stat-label">SKUs</div><div class="stat-value">${week.skus}</div></div>`;html+=`<div class="stat"><div class="stat-label">Velocidad</div><div class="stat-value">${week.speed}</div></div>`;html+=`<div class="stat"><div class="stat-label">Ganado</div><div class="stat-value highlight">$${week.earned.toLocaleString()}</div></div>`;html+='</div></div>';html+='<div class="card"><div class="card-title">Este Mes</div><div class="stats-grid">';html+=`<div class="stat"><div class="stat-label">Pedidos</div><div class="stat-value">${month.orders}</div></div>`;html+=`<div class="stat"><div class="stat-label">SKUs</div><div class="stat-value">${month.skus}</div></div>`;html+=`<div class="stat"><div class="stat-label">Velocidad</div><div class="stat-value">${month.speed}</div></div>`;html+=`<div class="stat"><div class="stat-label">Ganado</div><div class="stat-value highlight">$${month.earned.toLocaleString()}</div></div>`;html+='</div></div>';html+=`<div class="card"><div class="card-title">Tendencia</div><div style="text-align:center"><div style="font-size:32px;font-weight:700;margin:16px 0">${stats.recent_speed} SKUs/h</div><div class="trend ${stats.change_percent>0?'up':stats.change_percent<0?'down':'neutral'}">${stats.change_percent>0?'↑':stats.change_percent<0?'↓':'→'} ${Math.abs(stats.change_percent)}%</div></div></div>`;if(records&&records.speed_trend){html+='<div class="card"><div class="card-title">Últimos 7 Días</div>';const recent7=records.speed_trend.slice(-7);html+='<div class="stats-grid">';recent7.forEach(day=>{const date=new Date(day.date);const dayName=date.toLocaleDateString('es-CL',{weekday:'short'});html+=`<div class="stat"><div class="stat-label">${dayName}</div><div class="stat-value">${day.speed}</div></div>`;});html+='</div></div>';}html+='<div class="card"><div class="card-title">Total</div><div class="stats-grid">';html+=`<div class="stat"><div class="stat-label">Total Ganado</div><div class="stat-value highlight">$${allTime.total_earned.toLocaleString()}</div></div>`;html+=`<div class="stat"><div class="stat-label">Pedidos</div><div class="stat-value">${allTime.total_orders}</div></div>`;html+=`<div class="stat"><div class="stat-label">SKUs</div><div class="stat-value">${allTime.total_skus.toLocaleString()}</div></div>`;html+=`<div class="stat"><div class="stat-label">Velocidad</div><div class="stat-value">${allTime.avg_speed}</div></div>`;html+='</div></div>';html+='</div>';return html;}
-function renderOrders(recent,records){let html='<div class="section active">';html+='<div class="card"><div class="card-title">Últimos Pedidos</div>';html+='<ul class="order-list">';recent.forEach(o=>{html+=`<li class="order-item"><div><div class="order-cliente">${o.cliente}</div><div class="order-details">${o.fecha} - ${o.skus} SKUs - ${o.tiempo}</div></div><div class="order-speed">${o.speed}</div></li>`;});html+='</ul></div>';if(records&&records.speed_by_range){html+='<div class="card"><div class="card-title">Análisis por Tamaño de Pedido</div>';Object.entries(records.speed_by_range).forEach(([range,data])=>{const efficiency=data.avg_speed>25?'🔥':data.avg_speed>20?'⚡':data.avg_speed>15?'👍':'📈';html+=`<div class="best-item"><div class="best-title">${range} ${efficiency}</div><div class="best-value">${data.avg_speed} SKUs/h</div><div class="best-details">${data.orders} pedidos • Tiempo prom: ${data.avg_time} mins</div></div>`;});html+='</div>';}if(records&&records.weekly_comparison&&records.weekly_comparison.length>0){html+='<div class="card"><div class="card-title">Progreso Semanal</div>';records.weekly_comparison.forEach((week,i)=>{const trend=i>0&&records.weekly_comparison[i-1]?week.avg_speed>records.weekly_comparison[i-1].avg_speed?'📈':'📉':'📊';html+=`<div class="best-item"><div class="best-title">${week.week} ${trend}</div><div class="best-value">${week.avg_speed} SKUs/h</div><div class="best-details">${week.orders} pedidos • ${Math.floor(week.total_time/60)}h trabajo</div></div>`;});html+='</div>';}html+='</div>';return html;}
+let ordersData = null, currentOrdersView = 'recent';
+
+async function fetchOrdersData() {
+    if (ordersData) return ordersData;
+    try {
+        const [daily, monthly] = await Promise.all([
+            fetch('/api/orders/daily').then(r => r.json()),
+            fetch('/api/orders/monthly').then(r => r.json())
+        ]);
+        ordersData = { daily, monthly };
+        return ordersData;
+    } catch (e) {
+        console.error('Error loading orders data:', e);
+        return { daily: [], monthly: [] };
+    }
+}
+
+function showOrdersTab(tab) {
+    currentOrdersView = tab;
+    document.querySelectorAll('.tab-secondary').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+    renderDashboard(cachedData);
+}
+
+async function expandDayOrders(dateStr) {
+    if (!ordersData) ordersData = await fetchOrdersData();
+    const dayData = ordersData.daily.find(d => d.date === dateStr);
+    if (!dayData) return;
+    
+    const dayDiv = document.getElementById(`day-${dateStr}`);
+    if (dayDiv.classList.contains('expanded')) {
+        dayDiv.classList.remove('expanded');
+        // Remove existing expanded content
+        const expandedDiv = dayDiv.querySelector('.expanded-orders');
+        if (expandedDiv) expandedDiv.remove();
+        return;
+    }
+    
+    // Store original content before expanding
+    if (!dayDiv.dataset.originalContent) {
+        dayDiv.dataset.originalContent = dayDiv.innerHTML;
+    }
+    
+    let expandedHtml = `<div class="expanded-orders">`;
+    dayData.orders.forEach(order => {
+        expandedHtml += `<div class="order-detail">
+            <div class="order-cliente">${order.cliente}</div>
+            <div class="order-stats">
+                <span>🛒 ${order.skus} SKUs</span>
+                <span>⏱️ ${order.tiempo}</span>
+                <span>💰 $${order.earnings.toLocaleString()}</span>
+            </div>
+        </div>`;
+    });
+    expandedHtml += `</div>`;
+    
+    // Replace content with original + expanded
+    dayDiv.innerHTML = dayDiv.dataset.originalContent + expandedHtml;
+    dayDiv.classList.add('expanded');
+}
+
+function renderOrders(recent, records) {
+    let html = '<div class="section active">';
+    
+    html += '<div class="card"><div class="card-title">📋 Gestión de Pedidos</div>';
+    html += '<div class="tabs-secondary">';
+    html += '<div class="tab-secondary' + (currentOrdersView === 'recent' ? ' active' : '') + '" onclick="showOrdersTab(\'recent\')">🕒 Recientes</div>';
+    html += '<div class="tab-secondary' + (currentOrdersView === 'daily' ? ' active' : '') + '" onclick="showOrdersTab(\'daily\')">📅 Por Día</div>';
+    html += '<div class="tab-secondary' + (currentOrdersView === 'monthly' ? ' active' : '') + '" onclick="showOrdersTab(\'monthly\')">📊 Por Mes</div>';
+    html += '</div>';
+    
+    if (currentOrdersView === 'recent') {
+        html += '<div class="order-list-container">';
+        recent.forEach(o => {
+            html += `<div class="order-item-card">
+                <div class="order-header">
+                    <div class="order-cliente">${o.cliente}</div>
+                    <div class="order-speed-badge">${o.speed} SKUs/h</div>
+                </div>
+                <div class="order-details">
+                    📅 ${o.fecha} • 🛒 ${o.skus} SKUs • ⏱️ ${o.tiempo}
+                </div>
+            </div>`;
+        });
+        html += '</div>';
+    } else if (currentOrdersView === 'daily') {
+        html += '<div id="dailyOrdersContainer"><div class="loading">Cargando pedidos por día...</div></div>';
+        // Load daily orders asynchronously
+        setTimeout(async () => {
+            const orders = await fetchOrdersData();
+            const container = document.getElementById('dailyOrdersContainer');
+            if (container) {
+                let dailyHtml = '';
+                orders.daily.slice(0, 14).forEach(day => {
+                    const efficiency = day.speed > 25 ? '🔥' : day.speed > 20 ? '⚡' : day.speed > 15 ? '👍' : '📈';
+                    dailyHtml += `<div class="day-summary" id="day-${day.date}" onclick="expandDayOrders('${day.date}')">
+                        <div class="day-header">
+                            <div class="day-info">
+                                <div class="day-date">${day.date_formatted} (${day.weekday})</div>
+                                <div class="day-stats">${day.orders_count} pedidos • ${day.total_skus} SKUs • $${day.total_earned.toLocaleString()}</div>
+                            </div>
+                            <div class="day-metrics">
+                                <div class="day-speed">${day.speed} ${efficiency}</div>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+                container.innerHTML = dailyHtml;
+            }
+        }, 100);
+    } else if (currentOrdersView === 'monthly') {
+        html += '<div id="monthlyOrdersContainer"><div class="loading">Cargando pedidos por mes...</div></div>';
+        // Load monthly orders asynchronously
+        setTimeout(async () => {
+            const orders = await fetchOrdersData();
+            const container = document.getElementById('monthlyOrdersContainer');
+            if (container) {
+                let monthlyHtml = '';
+                orders.monthly.forEach(month => {
+                    monthlyHtml += `<div class="month-summary">
+                        <div class="month-header">
+                            <div class="month-title">${month.month_formatted}</div>
+                            <div class="month-totals">
+                                📋 ${month.orders_count} pedidos • 🛒 ${month.total_skus} SKUs • 💰 $${month.total_earned.toLocaleString()}
+                            </div>
+                            <div class="month-metrics">
+                                <span>⚡ ${month.speed} SKUs/h</span>
+                                <span>📅 ${month.working_days} días</span>
+                            </div>
+                        </div>
+                        <div class="daily-breakdown">`;
+                    month.daily_breakdown.forEach(day => {
+                        monthlyHtml += `<div class="mini-day">
+                            <div class="mini-date">${day.date_formatted}</div>
+                            <div class="mini-stats">${day.orders_count} pedidos</div>
+                        </div>`;
+                    });
+                    monthlyHtml += '</div></div>';
+                });
+                container.innerHTML = monthlyHtml;
+            }
+        }, 100);
+    }
+    
+    html += '</div>';
+    
+    // Performance analysis card
+    if (records && records.speed_by_range) {
+        html += '<div class="card"><div class="card-title">📊 Análisis de Rendimiento</div>';
+        Object.entries(records.speed_by_range).forEach(([range, data]) => {
+            const efficiency = data.avg_speed > 25 ? '🔥' : data.avg_speed > 20 ? '⚡' : data.avg_speed > 15 ? '�' : '�';
+            html += `<div class="best-item"><div class="best-title">${range} ${efficiency}</div><div class="best-value">${data.avg_speed} SKUs/h</div><div class="best-details">${data.orders} pedidos • Tiempo prom: ${data.avg_time} mins</div></div>`;
+        });
+        html += '</div>';
+    }
+    
+    html += '</div>';
+    return html;
+}
 function renderRecords(bests,records){let html='<div class="section active">';html+='<div class="card"><div class="card-title">Records Personales</div>';html+=bests.fastest_order?`<div class="best-item"><div class="best-title">Más Rápido ⚡</div><div class="best-value">${bests.fastest_order.time} mins</div><div class="best-details">${bests.fastest_order.skus} SKUs - ${bests.fastest_order.cliente}</div></div>`:'';html+=bests.most_skus?`<div class="best-item"><div class="best-title">Más SKUs 📦</div><div class="best-value">${bests.most_skus.skus} SKUs</div><div class="best-details">${bests.most_skus.time} mins - ${bests.most_skus.cliente}</div></div>`:'';html+=bests.best_speed?`<div class="best-item"><div class="best-title">Mejor Velocidad 🔥</div><div class="best-value">${bests.best_speed.speed} SKUs/h</div><div class="best-details">${bests.best_speed.skus} SKUs - ${bests.best_speed.cliente}</div></div>`:'';html+='</div>';html+='<div class="card"><div class="card-title">Velocidad por Rango de SKUs</div>';Object.entries(records.speed_by_range||{}).forEach(([range,data])=>{html+=`<div class="best-item"><div class="best-title">${range}</div><div class="best-value">${data.avg_speed} SKUs/h</div><div class="best-details">${data.orders} pedidos • Máx: ${data.max_speed} • Tiempo promedio: ${data.avg_time} mins</div></div>`;});html+='</div>';html+='<div class="card"><div class="card-title">Comparación Semanal</div>';(records.weekly_comparison||[]).forEach(week=>{html+=`<div class="best-item"><div class="best-title">${week.week}</div><div class="best-value">${week.avg_speed} SKUs/h</div><div class="best-details">${week.orders} pedidos • ${week.total_skus} SKUs • ${Math.floor(week.total_time/60)}h ${week.total_time%60}m</div></div>`;});html+='</div>';html+='<div class="card"><div class="card-title">Top 5 Pedidos Más Rápidos</div>';(records.top_fast_orders||[]).slice(0,5).forEach((order,i)=>{html+=`<div class="best-item"><div class="best-title">#${i+1}</div><div class="best-value">${order.Tiempo_mins} mins</div><div class="best-details">${order.SKUs} SKUs • ${order.speed} SKUs/h • ${order.Cliente}</div></div>`;});html+='</div>';html+='<div class="card"><div class="card-title">Top 5 Mejor Velocidad (10+ SKUs)</div>';(records.top_speed_orders||[]).slice(0,5).forEach((order,i)=>{html+=`<div class="best-item"><div class="best-title">#${i+1}</div><div class="best-value">${order.speed} SKUs/h</div><div class="best-details">${order.SKUs} SKUs • ${order.Tiempo_mins} mins • ${order.Cliente}</div></div>`;});html+='</div>';html+='</div>';return html;}
-function renderProducts(data){let html='<div class="section active">';html+='<div class="card"><div class="card-title">Base de Datos de Productos</div>';html+=`<div style="text-align:center;margin-bottom:16px"><div style="font-size:20px;font-weight:700;color:#3b82f6">${data.summary.total_products} Productos</div><div style="color:#94a3b8;font-size:14px">${data.summary.total_brands} marcas • ${data.summary.total_locations} ubicaciones</div></div>`;html+='<div class="tabs-secondary">';html+='<div class="tab-secondary'+(currentProductTab==='browse'?' active':'')+'" onclick="showProductTab(\'browse\')">📂 Ver Todos</div>';html+='<div class="tab-secondary'+(currentProductTab==='search'?' active':'')+'" onclick="showProductTab(\'search\')">🔍 Buscar</div>';html+='<div class="tab-secondary'+(currentProductTab==='brands'?' active':'')+'" onclick="showProductTab(\'brands\')">🏷️ Marcas</div>';html+='<div class="tab-secondary'+(currentProductTab==='locations'?' active':'')+'" onclick="showProductTab(\'locations\')">📍 Ubicaciones</div>';html+='</div>';if(currentProductTab==='browse'){html+='<div class="tabs-secondary" style="margin-bottom:8px">';html+='<div class="tab-secondary'+(currentBrowseSort==='name'?' active':'')+'" onclick="setBrowseSort(\'name\')">📝 Nombre</div>';html+='<div class="tab-secondary'+(currentBrowseSort==='brand'?' active':'')+'" onclick="setBrowseSort(\'brand\')">🏷️ Marca</div>';html+='<div class="tab-secondary'+(currentBrowseSort==='frequency'?' active':'')+'" onclick="setBrowseSort(\'frequency\')">📊 Popular</div>';html+='<div class="tab-secondary'+(currentBrowseSort==='price'?' active':'')+'" onclick="setBrowseSort(\'price\')">💰 Precio</div>';html+='</div>';html+='<div id="browseResults"><div style="text-align:center;color:#94a3b8;padding:20px">Cargando productos...</div></div>';}else if(currentProductTab==='search'){html+='<input type="text" class="search-box" placeholder="Buscar productos, marcas o categorías..." onkeyup="handleProductSearch(event)">';html+='<div id="searchResults"><div style="text-align:center;color:#94a3b8;padding:20px">Escribe para buscar productos...</div></div>';}else if(currentProductTab==='brands'){html+='<div id="brandsList">';const topBrands=Object.entries(data.brands.brands).sort((a,b)=>b[1].product_count-a[1].product_count).slice(0,20);topBrands.forEach(([brand,stats])=>{html+=`<div class="brand-item"><div class="brand-name">${brand}</div><div class="brand-count">${stats.product_count}</div></div>`;});html+='</div>';}else if(currentProductTab==='locations'){html+='<div id="locationsList">';Object.entries(data.locations).sort((a,b)=>b[1].product_count-a[1].product_count).forEach(([location,stats])=>{html+=`<div class="location-item brand-item" onclick="showLocationProducts('${location}')"><div class="brand-name">${location}</div><div class="brand-count">${stats.product_count}</div></div>`;});html+='</div>';}html+='</div></div>';return html;}
+let enhancedProductData = null, expandedBrands = new Set(), expandedLocations = new Set();
+
+async function fetchEnhancedProducts() {
+    if (enhancedProductData) return enhancedProductData;
+    try {
+        const [byBrand, byLocation, byCategory] = await Promise.all([
+            fetch('/api/products/enhanced/by-brand').then(r => r.json()),
+            fetch('/api/products/enhanced/by-location').then(r => r.json()),
+            fetch('/api/products/enhanced/by-category').then(r => r.json())
+        ]);
+        enhancedProductData = { byBrand, byLocation, byCategory };
+        return enhancedProductData;
+    } catch (e) {
+        console.error('Error loading enhanced products:', e);
+        return { byBrand: [], byLocation: [], byCategory: [] };
+    }
+}
+
+function toggleBrandExpansion(brand) {
+    if (expandedBrands.has(brand)) {
+        expandedBrands.delete(brand);
+    } else {
+        expandedBrands.add(brand);
+    }
+    renderDashboard(cachedData);
+}
+
+function toggleLocationExpansion(location) {
+    if (expandedLocations.has(location)) {
+        expandedLocations.delete(location);
+    } else {
+        expandedLocations.add(location);
+    }
+    renderDashboard(cachedData);
+}
+
+function renderProducts(data) {
+    let html = '<div class="section active">';
+    html += '<div class="card"><div class="card-title">🔍 Base de Datos de Productos</div>';
+    html += `<div style="text-align:center;margin-bottom:16px"><div style="font-size:20px;font-weight:700;color:#3b82f6">${data.summary.total_products} Productos</div><div style="color:#94a3b8;font-size:14px">${data.summary.total_brands} marcas • ${data.summary.total_locations} ubicaciones</div></div>`;
+    html += '<div class="tabs-secondary">';
+    html += '<div class="tab-secondary' + (currentProductTab === 'browse' ? ' active' : '') + '" onclick="showProductTab(\'browse\')">📂 Ver Todos</div>';
+    html += '<div class="tab-secondary' + (currentProductTab === 'search' ? ' active' : '') + '" onclick="showProductTab(\'search\')">🔍 Buscar</div>';
+    html += '<div class="tab-secondary' + (currentProductTab === 'brands' ? ' active' : '') + '" onclick="showProductTab(\'brands\')">🏷️ Por Marca</div>';
+    html += '<div class="tab-secondary' + (currentProductTab === 'locations' ? ' active' : '') + '" onclick="showProductTab(\'locations\')">📍 Por Ubicación</div>';
+    html += '<div class="tab-secondary' + (currentProductTab === 'categories' ? ' active' : '') + '" onclick="showProductTab(\'categories\')">📦 Por Categoría</div>';
+    html += '</div>';
+    
+    if (currentProductTab === 'browse') {
+        html += '<div class="tabs-secondary" style="margin-bottom:8px">';
+        html += '<div class="tab-secondary' + (currentBrowseSort === 'name' ? ' active' : '') + '" onclick="setBrowseSort(\'name\')">📝 Nombre</div>';
+        html += '<div class="tab-secondary' + (currentBrowseSort === 'brand' ? ' active' : '') + '" onclick="setBrowseSort(\'brand\')">🏷️ Marca</div>';
+        html += '<div class="tab-secondary' + (currentBrowseSort === 'frequency' ? ' active' : '') + '" onclick="setBrowseSort(\'frequency\')">📊 Popular</div>';
+        html += '<div class="tab-secondary' + (currentBrowseSort === 'price' ? ' active' : '') + '" onclick="setBrowseSort(\'price\')">💰 Precio</div>';
+        html += '</div>';
+        html += '<div id="browseResults"><div style="text-align:center;color:#94a3b8;padding:20px">Cargando productos...</div></div>';
+    } else if (currentProductTab === 'search') {
+        html += '<input type="text" class="search-box" placeholder="Buscar productos, marcas o categorías..." onkeyup="handleProductSearch(event)">';
+        html += '<div id="searchResults"><div style="text-align:center;color:#94a3b8;padding:20px">Escribe para buscar productos...</div></div>';
+    } else if (currentProductTab === 'brands') {
+        html += '<div id="brandsContainer"><div class="loading">Cargando marcas...</div></div>';
+        // Load brands asynchronously
+        setTimeout(async () => {
+            const enhanced = await fetchEnhancedProducts();
+            const container = document.getElementById('brandsContainer');
+            if (container) {
+                let brandsHtml = '';
+                enhanced.byBrand.slice(0, 20).forEach(brand => {
+                    const isExpanded = expandedBrands.has(brand.brand);
+                    const icon = isExpanded ? '🔽' : '▶️';
+                    brandsHtml += `<div class="expandable-section">
+                        <div class="section-header" onclick="toggleBrandExpansion('${brand.brand}')">
+                            <div class="section-info">
+                                <span class="expand-icon">${icon}</span>
+                                <div class="section-details">
+                                    <div class="section-title">${brand.brand}</div>
+                                    <div class="section-stats">${brand.product_count} productos • ${brand.total_frequency} picks • ${brand.locations_count} ubicaciones</div>
+                                    <div class="section-price">$${brand.price_range.min.toLocaleString()} - $${brand.price_range.max.toLocaleString()}</div>
+                                </div>
+                            </div>
+                        </div>`;
+                    
+                    if (isExpanded) {
+                        brandsHtml += '<div class="expanded-content">';
+                        brand.products.slice(0, 10).forEach(product => {
+                            brandsHtml += `<div class="product-item-mini">
+                                <div class="product-name">${product.name}</div>
+                                <div class="product-details">📊 ${product.frequency} picks • 💰 $${product.avg_price}</div>
+                                ${product.locations[0] ? `<div class="product-location">${product.locations[0]}</div>` : ''}
+                            </div>`;
+                        });
+                        if (brand.products.length > 10) {
+                            brandsHtml += `<div class="more-items">... y ${brand.products.length - 10} productos más</div>`;
+                        }
+                        brandsHtml += '</div>';
+                    }
+                    brandsHtml += '</div>';
+                });
+                container.innerHTML = brandsHtml;
+            }
+        }, 100);
+    } else if (currentProductTab === 'locations') {
+        html += '<div id="locationsContainer"><div class="loading">Cargando ubicaciones...</div></div>';
+        // Load locations asynchronously
+        setTimeout(async () => {
+            const enhanced = await fetchEnhancedProducts();
+            const container = document.getElementById('locationsContainer');
+            if (container) {
+                let locationsHtml = '';
+                enhanced.byLocation.slice(0, 30).forEach(location => {
+                    const isExpanded = expandedLocations.has(location.location);
+                    const icon = isExpanded ? '🔽' : '▶️';
+                    locationsHtml += `<div class="expandable-section">
+                        <div class="section-header" onclick="toggleLocationExpansion('${location.location}')">
+                            <div class="section-info">
+                                <span class="expand-icon">${icon}</span>
+                                <div class="section-details">
+                                    <div class="section-title">${location.location}</div>
+                                    <div class="section-stats">${location.product_count} productos • ${location.brands_count} marcas • ${location.total_frequency} picks</div>
+                                    <div class="section-brands">Marcas: ${location.brands.slice(0, 3).join(', ')}${location.brands.length > 3 ? '...' : ''}</div>
+                                </div>
+                            </div>
+                        </div>`;
+                    
+                    if (isExpanded) {
+                        locationsHtml += '<div class="expanded-content">';
+                        location.products.slice(0, 10).forEach(product => {
+                            locationsHtml += `<div class="product-item-mini">
+                                <div class="product-brand">${product.brand}</div>
+                                <div class="product-name">${product.name}</div>
+                                <div class="product-details">📊 ${product.frequency} picks • 💰 $${product.avg_price}</div>
+                            </div>`;
+                        });
+                        if (location.products.length > 10) {
+                            locationsHtml += `<div class="more-items">... y ${location.products.length - 10} productos más</div>`;
+                        }
+                        locationsHtml += '</div>';
+                    }
+                    locationsHtml += '</div>';
+                });
+                container.innerHTML = locationsHtml;
+            }
+        }, 100);
+    } else if (currentProductTab === 'categories') {
+        html += '<div id="categoriesContainer"><div class="loading">Cargando categorías...</div></div>';
+        // Load categories asynchronously
+        setTimeout(async () => {
+            const enhanced = await fetchEnhancedProducts();
+            const container = document.getElementById('categoriesContainer');
+            if (container) {
+                let categoriesHtml = '';
+                enhanced.byCategory.forEach(category => {
+                    const categoryIcon = {
+                        'Despensa': '🥫', 'Granos y Cereales': '🌾', 'Bebidas': '🥤',
+                        'Lácteos': '🥛', 'Refrigerados': '❄️', 'Congelados': '🧊',
+                        'Limpieza': '🧽', 'Cuidado Personal': '🧴', 'Hogar': '🏠',
+                        'Uncategorized': '📦'
+                    }[category.category] || '📦';
+                    
+                    categoriesHtml += `<div class="category-card">
+                        <div class="category-header">
+                            <div class="category-icon">${categoryIcon}</div>
+                            <div class="category-info">
+                                <div class="category-title">${category.category}</div>
+                                <div class="category-stats">${category.product_count} productos • ${category.brands_count} marcas • ${category.total_frequency} picks</div>
+                            </div>
+                        </div>
+                        <div class="category-preview">`;
+                    
+                    category.products.slice(0, 3).forEach(product => {
+                        categoriesHtml += `<div class="mini-product">${product.brand} - ${product.name.substring(0, 30)}${product.name.length > 30 ? '...' : ''}</div>`;
+                    });
+                    
+                    if (category.products.length > 3) {
+                        categoriesHtml += `<div class="more-items">... y ${category.products.length - 3} más</div>`;
+                    }
+                    
+                    categoriesHtml += '</div></div>';
+                });
+                container.innerHTML = categoriesHtml;
+            }
+        }, 100);
+    }
+    
+    html += '</div></div>';
+    return html;
+}
 async function handleProductSearch(e){const query=e.target.value.trim();const resultsDiv=document.getElementById('searchResults');if(query.length<2){resultsDiv.innerHTML='<div style="text-align:center;color:#94a3b8;padding:20px">Escribe al menos 2 caracteres...</div>';return;}if(query.length<3&&query!==e.target.value.trim())return;try{const products=await searchProducts(query);if(products.length===0){resultsDiv.innerHTML='<div style="text-align:center;color:#94a3b8;padding:20px">No se encontraron productos</div>';return;}let html='';products.forEach(product=>{html+='<div class="product-item">';html+=`<div class="product-brand">${product.brand}</div>`;html+=`<div class="product-name">${product.name}</div>`;html+=`<div class="product-details">Frecuencia: ${product.frequency} • Precio: $${product.avg_price_per_unit}</div>`;if(product.locations&&product.locations.length>0){html+=`<div class="product-location">${product.locations[0]}</div>`;}html+='</div>';});resultsDiv.innerHTML=html;}catch(e){resultsDiv.innerHTML='<div style="text-align:center;color:#ef4444;padding:20px">Error al buscar productos</div>';}}
 async function showLocationProducts(location){try{const data=await getProductsByLocation(location);const resultsDiv=document.getElementById('locationsList');let html=`<div class="card-title" style="margin-bottom:16px">📍 ${location} (${data.products.length} productos)</div>`;data.products.forEach(product=>{html+='<div class="product-item">';html+=`<div class="product-brand">${product.brand}</div>`;html+=`<div class="product-name">${product.name}</div>`;html+=`<div class="product-details">Frecuencia: ${product.frequency} • $${product.avg_price_per_unit}</div>`;html+='</div>';});html+=`<div style="text-align:center;margin-top:16px"><button class="nav-tab" onclick="currentProductTab='locations';renderDashboard(cachedData)">⬅️ Volver a ubicaciones</button></div>`;resultsDiv.innerHTML=html;}catch(e){console.error('Error:',e);}}
 function renderMap(layout){const zones=layout.zones||[];const aisles=layout.aisles||[];const walls=layout.walls||[];const minX=400;const minY=-2700;const maxX=3400;const maxY=600;const layoutWidth=maxX-minX;const layoutHeight=maxY-minY;const zoneTypes={'dry_shelves':{name:'Abarrotes',color:'#f59e0b'},'produce':{name:'Frutas y Verduras',color:'#10b981'},'fridges':{name:'Refrigerados',color:'#06b6d4'},'freezers':{name:'Congelados',color:'#3b82f6'},'chilled_produce':{name:'Refrigerados Frescos',color:'#22c55e'},'prepared_meals':{name:'Comidas Preparadas',color:'#14b8a6'},'cecineria':{name:'Cecinería',color:'#ef4444'},'frontera':{name:'Frontera',color:'#8b5cf6'},'ice_dispenser':{name:'Dispensador Hielo',color:'#0ea5e9'},'bagging':{name:'Mesas Embolsado',color:'#64748b'},'backpacks':{name:'Mochilas',color:'#a855f7'},'handoff':{name:'Despacho/Entrega',color:'#fb923c'},'aisle':{name:'Pasillos',color:'#475569'}};let svg='<div class="section active"><div class="card"><div class="card-title">Mapa de Darkstore</div><div class="map-container">';svg+=`<svg class="map-svg" viewBox="${minX} ${minY} ${layoutWidth} ${layoutHeight}" xmlns="http://www.w3.org/2000/svg">`;walls.forEach(w=>{svg+=`<rect class="wall-rect" x="${w.x}" y="${w.y}" width="${w.width}" height="${w.height}" stroke="${w.border_color||'#64748b'}"/>`;});zones.forEach(z=>{svg+=`<rect class="zone-rect" x="${z.x}" y="${z.y}" width="${z.width}" height="${z.height}" fill="${z.color}"/>`;if(z.label)svg+=`<text class="zone-label" x="${z.x+z.width/2}" y="${z.y+z.height/2}" text-anchor="middle" dominant-baseline="middle">${z.label}</text>`;});aisles.forEach(a=>{svg+=`<rect class="aisle-rect" x="${a.x}" y="${a.y}" width="${a.width}" height="${a.height}" fill="${a.color}"/>`;if(a.label)svg+=`<text class="zone-label" x="${a.x+a.width/2}" y="${a.y+a.height/2}" text-anchor="middle" dominant-baseline="middle">${a.label}</text>`;});svg+='</svg></div>';svg+='<div class="legend">';Object.entries(zoneTypes).forEach(([key,val])=>{svg+=`<div class="legend-item"><div class="legend-color" style="background:${val.color}"></div><span>${val.name}</span></div>`;});svg+='</div></div></div>';return svg;}
