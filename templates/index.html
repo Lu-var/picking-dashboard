@@ -143,7 +143,69 @@ async function fetchData(){try{const [today,week,month,recent,stats,bests,allTim
 async function fetchLayout(){try{const r=await fetch('/api/layout');layoutData=await r.json();renderDashboard(cachedData);}catch(e){console.error('Error loading layout:',e);}}
 async function fetchRecords(){try{const r=await fetch('/api/records_detailed');recordsData=await r.json();renderDashboard(cachedData);}catch(e){console.error('Error loading records:',e);}}
 function renderDashboard(d){const {today,week,month,recent,stats,bests,allTime}=d;const c=document.getElementById('content');let h='';if(currentSection==='overview'){h=renderOverview(today,week,month,stats,allTime,recordsData);}else if(currentSection==='records'){h=recordsData?renderRecords(bests,recordsData):`<div class="section active"><div class="card"><div class="card-title">Records Personales</div>${bests.fastest_order?`<div class="best-item"><div class="best-title">Más Rápido</div><div class="best-value">${bests.fastest_order.time} mins</div><div class="best-details">${bests.fastest_order.skus} SKUs - ${bests.fastest_order.cliente}</div></div>`:''}${bests.most_skus?`<div class="best-item"><div class="best-title">Más SKUs</div><div class="best-value">${bests.most_skus.skus} SKUs</div><div class="best-details">${bests.most_skus.time} mins - ${bests.most_skus.cliente}</div></div>`:''}${bests.best_speed?`<div class="best-item"><div class="best-title">Mejor Velocidad</div><div class="best-value">${bests.best_speed.speed} SKUs/h</div><div class="best-details">${bests.best_speed.skus} SKUs - ${bests.best_speed.cliente}</div></div>`:''}  </div><div class="loading">Cargando análisis detallado...</div></div>`;}else if(currentSection==='orders'){h=renderOrders(recent,recordsData);}else if(currentSection==='products'){h=productData?renderProducts(productData):'<div class="loading">Cargando base de datos de productos...</div>';}else if(currentSection==='map'){h=layoutData?renderMap(layoutData):'<div class="loading">Cargando mapa...</div>';}c.innerHTML=h;}
-function renderOverview(today,week,month,stats,allTime,records){let html='<div class="section active">';html+='<div class="card"><div class="card-title">Hoy</div><div class="stats-grid">';html+=`<div class="stat"><div class="stat-label">Pedidos</div><div class="stat-value highlight">${today.orders}</div></div>`;html+=`<div class="stat"><div class="stat-label">SKUs</div><div class="stat-value">${today.skus}</div></div>`;html+=`<div class="stat"><div class="stat-label">Velocidad</div><div class="stat-value success">${today.speed}</div></div>`;html+=`<div class="stat"><div class="stat-label">Ganado</div><div class="stat-value highlight">$${today.earned.toLocaleString()}</div></div>`;html+='</div></div>';html+='<div class="card"><div class="card-title">Esta Semana</div><div class="stats-grid">';html+=`<div class="stat"><div class="stat-label">Pedidos</div><div class="stat-value">${week.orders}</div></div>`;html+=`<div class="stat"><div class="stat-label">SKUs</div><div class="stat-value">${week.skus}</div></div>`;html+=`<div class="stat"><div class="stat-label">Velocidad</div><div class="stat-value">${week.speed}</div></div>`;html+=`<div class="stat"><div class="stat-label">Ganado</div><div class="stat-value highlight">$${week.earned.toLocaleString()}</div></div>`;html+='</div></div>';html+='<div class="card"><div class="card-title">Este Mes</div><div class="stats-grid">';html+=`<div class="stat"><div class="stat-label">Pedidos</div><div class="stat-value">${month.orders}</div></div>`;html+=`<div class="stat"><div class="stat-label">SKUs</div><div class="stat-value">${month.skus}</div></div>`;html+=`<div class="stat"><div class="stat-label">Velocidad</div><div class="stat-value">${month.speed}</div></div>`;html+=`<div class="stat"><div class="stat-label">Ganado</div><div class="stat-value highlight">$${month.earned.toLocaleString()}</div></div>`;html+='</div></div>';html+=`<div class="card"><div class="card-title">Tendencia</div><div style="text-align:center"><div style="font-size:32px;font-weight:700;margin:16px 0">${stats.recent_speed} SKUs/h</div><div class="trend ${stats.change_percent>0?'up':stats.change_percent<0?'down':'neutral'}">${stats.change_percent>0?'↑':stats.change_percent<0?'↓':'→'} ${Math.abs(stats.change_percent)}%</div></div></div>`;if(records&&records.speed_trend){html+='<div class="card"><div class="card-title">Últimos 7 Días</div>';const recent7=records.speed_trend.slice(-7);html+='<div class="stats-grid">';recent7.forEach(day=>{const date=new Date(day.date);const dayName=date.toLocaleDateString('es-CL',{weekday:'short'});html+=`<div class="stat"><div class="stat-label">${dayName}</div><div class="stat-value">${day.speed}</div></div>`;});html+='</div></div>';}html+='<div class="card"><div class="card-title">Total</div><div class="stats-grid">';html+=`<div class="stat"><div class="stat-label">Total Ganado</div><div class="stat-value highlight">$${allTime.total_earned.toLocaleString()}</div></div>`;html+=`<div class="stat"><div class="stat-label">Pedidos</div><div class="stat-value">${allTime.total_orders}</div></div>`;html+=`<div class="stat"><div class="stat-label">SKUs</div><div class="stat-value">${allTime.total_skus.toLocaleString()}</div></div>`;html+=`<div class="stat"><div class="stat-label">Velocidad</div><div class="stat-value">${allTime.avg_speed}</div></div>`;html+='</div></div>';html+='</div>';return html;}
+
+function renderOverview(today, week, month, stats, allTime, records) {
+    let html = '<div class="section active">';
+    
+    // Today section with date
+    html += '<div class="card">';
+    html += `<div class="card-title">Hoy ${today.date_formatted ? `<span style="font-size:14px;font-weight:normal;color:#94a3b8">(${today.date_formatted})</span>` : ''}</div>`;
+    html += '<div class="stats-grid">';
+    html += `<div class="stat"><div class="stat-label">Pedidos</div><div class="stat-value highlight">${today.orders}</div></div>`;
+    html += `<div class="stat"><div class="stat-label">SKUs</div><div class="stat-value">${today.skus}</div></div>`;
+    html += `<div class="stat"><div class="stat-label">Velocidad</div><div class="stat-value success">${today.speed}</div></div>`;
+    html += `<div class="stat"><div class="stat-label">Ganado</div><div class="stat-value highlight">$${today.earned.toLocaleString()}</div></div>`;
+    html += '</div></div>';
+    
+    // Week section with date range
+    html += '<div class="card">';
+    html += `<div class="card-title">Esta Semana ${week.date_formatted ? `<span style="font-size:14px;font-weight:normal;color:#94a3b8">(${week.date_formatted})</span>` : ''}</div>`;
+    html += '<div class="stats-grid">';
+    html += `<div class="stat"><div class="stat-label">Pedidos</div><div class="stat-value">${week.orders}</div></div>`;
+    html += `<div class="stat"><div class="stat-label">SKUs</div><div class="stat-value">${week.skus}</div></div>`;
+    html += `<div class="stat"><div class="stat-label">Velocidad</div><div class="stat-value">${week.speed}</div></div>`;
+    html += `<div class="stat"><div class="stat-label">Ganado</div><div class="stat-value highlight">$${week.earned.toLocaleString()}</div></div>`;
+    html += '</div></div>';
+    
+    // Month section with month name/year
+    html += '<div class="card">';
+    html += `<div class="card-title">Este Mes ${month.date_formatted ? `<span style="font-size:14px;font-weight:normal;color:#94a3b8">(${month.date_formatted})</span>` : ''}</div>`;
+    html += '<div class="stats-grid">';
+    html += `<div class="stat"><div class="stat-label">Pedidos</div><div class="stat-value">${month.orders}</div></div>`;
+    html += `<div class="stat"><div class="stat-label">SKUs</div><div class="stat-value">${month.skus}</div></div>`;
+    html += `<div class="stat"><div class="stat-label">Velocidad</div><div class="stat-value">${month.speed}</div></div>`;
+    html += `<div class="stat"><div class="stat-label">Ganado</div><div class="stat-value highlight">$${month.earned.toLocaleString()}</div></div>`;
+    html += '</div></div>';
+    
+    // Trend
+    html += `<div class="card"><div class="card-title">Tendencia</div><div style="text-align:center"><div style="font-size:32px;font-weight:700;margin:16px 0">${stats.recent_speed} SKUs/h</div><div class="trend ${stats.change_percent > 0 ? 'up' : stats.change_percent < 0 ? 'down' : 'neutral'}">${stats.change_percent > 0 ? '↑' : stats.change_percent < 0 ? '↓' : '→'} ${Math.abs(stats.change_percent)}%</div></div></div>`;
+    
+    // Last 7 days with dates
+    if (records && records.speed_trend) {
+        html += '<div class="card"><div class="card-title">Últimos 7 Días</div>';
+        const recent7 = records.speed_trend.slice(-7);
+        html += '<div class="stats-grid">';
+        recent7.forEach(day => {
+            const date = new Date(day.date);
+            const dayName = date.toLocaleDateString('es-CL', { weekday: 'short' });
+            const dateStr = date.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit' });
+            html += `<div class="stat"><div class="stat-label">${dayName}<br><span style="font-size:11px;color:#94a3b8">${dateStr}</span></div><div class="stat-value">${day.speed}</div></div>`;
+        });
+        html += '</div></div>';
+    }
+    
+    // Total
+    html += '<div class="card"><div class="card-title">Total</div><div class="stats-grid">';
+    html += `<div class="stat"><div class="stat-label">Total Ganado</div><div class="stat-value highlight">$${allTime.total_earned.toLocaleString()}</div></div>`;
+    html += `<div class="stat"><div class="stat-label">Pedidos</div><div class="stat-value">${allTime.total_orders}</div></div>`;
+    html += `<div class="stat"><div class="stat-label">SKUs</div><div class="stat-value">${allTime.total_skus.toLocaleString()}</div></div>`;
+    html += `<div class="stat"><div class="stat-label">Velocidad</div><div class="stat-value">${allTime.avg_speed}</div></div>`;
+    html += '</div></div>';
+    
+    html += '</div>';
+    return html;
+}
+
 let ordersData = null, currentOrdersView = 'recent';
 
 async function fetchOrdersData() {
@@ -303,7 +365,78 @@ function renderOrders(recent, records) {
     html += '</div>';
     return html;
 }
-function renderRecords(bests,records){let html='<div class="section active">';html+='<div class="card"><div class="card-title">Records Personales</div>';html+=bests.fastest_order?`<div class="best-item"><div class="best-title">Más Rápido ⚡</div><div class="best-value">${bests.fastest_order.time} mins</div><div class="best-details">${bests.fastest_order.skus} SKUs - ${bests.fastest_order.cliente}</div></div>`:'';html+=bests.most_skus?`<div class="best-item"><div class="best-title">Más SKUs 📦</div><div class="best-value">${bests.most_skus.skus} SKUs</div><div class="best-details">${bests.most_skus.time} mins - ${bests.most_skus.cliente}</div></div>`:'';html+=bests.best_speed?`<div class="best-item"><div class="best-title">Mejor Velocidad 🔥</div><div class="best-value">${bests.best_speed.speed} SKUs/h</div><div class="best-details">${bests.best_speed.skus} SKUs - ${bests.best_speed.cliente}</div></div>`:'';html+='</div>';html+='<div class="card"><div class="card-title">Velocidad por Rango de SKUs</div>';Object.entries(records.speed_by_range||{}).forEach(([range,data])=>{html+=`<div class="best-item"><div class="best-title">${range}</div><div class="best-value">${data.avg_speed} SKUs/h</div><div class="best-details">${data.orders} pedidos • Máx: ${data.max_speed} • Tiempo promedio: ${data.avg_time} mins</div></div>`;});html+='</div>';html+='<div class="card"><div class="card-title">Comparación Semanal</div>';(records.weekly_comparison||[]).forEach(week=>{html+=`<div class="best-item"><div class="best-title">${week.week}</div><div class="best-value">${week.avg_speed} SKUs/h</div><div class="best-details">${week.orders} pedidos • ${week.total_skus} SKUs • ${Math.floor(week.total_time/60)}h ${week.total_time%60}m</div></div>`;});html+='</div>';html+='<div class="card"><div class="card-title">Top 5 Pedidos Más Rápidos</div>';(records.top_fast_orders||[]).slice(0,5).forEach((order,i)=>{html+=`<div class="best-item"><div class="best-title">#${i+1}</div><div class="best-value">${order.Tiempo_mins} mins</div><div class="best-details">${order.SKUs} SKUs • ${order.speed} SKUs/h • ${order.Cliente}</div></div>`;});html+='</div>';html+='<div class="card"><div class="card-title">Top 5 Mejor Velocidad (10+ SKUs)</div>';(records.top_speed_orders||[]).slice(0,5).forEach((order,i)=>{html+=`<div class="best-item"><div class="best-title">#${i+1}</div><div class="best-value">${order.speed} SKUs/h</div><div class="best-details">${order.SKUs} SKUs • ${order.Tiempo_mins} mins • ${order.Cliente}</div></div>`;});html+='</div>';html+='</div>';return html;}
+
+function renderRecords(bests, records) {
+    let html = '<div class="section active">';
+    html += '<div class="card"><div class="card-title">Records Personales</div>';
+    
+    // Fastest Order - show all data
+    html += bests.fastest_order ? `
+        <div class="best-item">
+            <div class="best-title">Más Rápido ⚡</div>
+            <div class="best-value">${bests.fastest_order.time} mins</div>
+            <div class="best-details">
+                ${bests.fastest_order.skus} SKUs • ${bests.fastest_order.speed} SKUs/h<br>
+                💰 $${bests.fastest_order.earnings.toLocaleString()} • 📅 ${bests.fastest_order.fecha}<br>
+                ${bests.fastest_order.cliente}
+            </div>
+        </div>` : '';
+    
+    // Most SKUs - show all data
+    html += bests.most_skus ? `
+        <div class="best-item">
+            <div class="best-title">Más SKUs 📦</div>
+            <div class="best-value">${bests.most_skus.skus} SKUs</div>
+            <div class="best-details">
+                ${bests.most_skus.time} mins • ${bests.most_skus.speed} SKUs/h<br>
+                💰 $${bests.most_skus.earnings.toLocaleString()} • 📅 ${bests.most_skus.fecha}<br>
+                ${bests.most_skus.cliente}
+            </div>
+        </div>` : '';
+    
+    // Best Speed - show all data
+    html += bests.best_speed ? `
+        <div class="best-item">
+            <div class="best-title">Mejor Velocidad 🔥</div>
+            <div class="best-value">${bests.best_speed.speed} SKUs/h</div>
+            <div class="best-details">
+                ${bests.best_speed.skus} SKUs • ${bests.best_speed.time} mins<br>
+                💰 $${bests.best_speed.earnings.toLocaleString()} • 📅 ${bests.best_speed.fecha}<br>
+                ${bests.best_speed.cliente}
+            </div>
+        </div>` : '';
+    
+    html += '</div>';
+    
+    // Rest of the records sections
+    html += '<div class="card"><div class="card-title">Velocidad por Rango de SKUs</div>';
+    Object.entries(records.speed_by_range || {}).forEach(([range, data]) => {
+        html += `<div class="best-item"><div class="best-title">${range}</div><div class="best-value">${data.avg_speed} SKUs/h</div><div class="best-details">${data.orders} pedidos • Máx: ${data.max_speed} • Tiempo promedio: ${data.avg_time} mins</div></div>`;
+    });
+    html += '</div>';
+    
+    html += '<div class="card"><div class="card-title">Comparación Semanal</div>';
+    (records.weekly_comparison || []).forEach(week => {
+        html += `<div class="best-item"><div class="best-title">${week.week}</div><div class="best-value">${week.avg_speed} SKUs/h</div><div class="best-details">${week.orders} pedidos • ${week.total_skus} SKUs • ${Math.floor(week.total_time / 60)}h ${week.total_time % 60}m</div></div>`;
+    });
+    html += '</div>';
+    
+    html += '<div class="card"><div class="card-title">Top 5 Pedidos Más Rápidos</div>';
+    (records.top_fast_orders || []).slice(0, 5).forEach((order, i) => {
+        html += `<div class="best-item"><div class="best-title">#${i + 1}</div><div class="best-value">${order.Tiempo_mins} mins</div><div class="best-details">${order.SKUs} SKUs • ${order.speed} SKUs/h • ${order.Cliente}</div></div>`;
+    });
+    html += '</div>';
+    
+    html += '<div class="card"><div class="card-title">Top 5 Mejor Velocidad (10+ SKUs)</div>';
+    (records.top_speed_orders || []).slice(0, 5).forEach((order, i) => {
+        html += `<div class="best-item"><div class="best-title">#${i + 1}</div><div class="best-value">${order.speed} SKUs/h</div><div class="best-details">${order.SKUs} SKUs • ${order.Tiempo_mins} mins • ${order.Cliente}</div></div>`;
+    });
+    html += '</div>';
+    
+    html += '</div>';
+    return html;
+}
+
 let enhancedProductData = null, expandedBrands = new Set(), expandedLocations = new Set();
 
 async function fetchEnhancedProducts() {

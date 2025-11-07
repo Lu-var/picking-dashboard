@@ -23,16 +23,22 @@ def load_data():
     """Fetch latest data from Google Sheets"""
     response = requests.get(get_sheet_url(), timeout=10)
     response.raise_for_status()
-    
-    df = pd.read_csv(StringIO(response.text))
-    
+    # Ensure UTF-8 decoding
+    csv_text = response.content.decode('utf-8')
+    df = pd.read_csv(StringIO(csv_text))
+
+    # Normalize string columns to fix encoding issues
+    for col in ['Cliente', 'Marca', 'Producto', 'Ubicacion', 'Estante', 'Pasillo']:
+        if col in df.columns:
+            df[col] = df[col].astype(str).apply(lambda x: x.encode('latin1').decode('utf-8') if '\ufffd' in x or 'Ã' in x else x)
+
     # Process data
     df['Fecha'] = pd.to_datetime(df['Fecha'], format='%d/%m/%Y', errors='coerce')
     df['SKUs'] = pd.to_numeric(df['SKUs'], errors='coerce').fillna(0).astype(int)
-    
+
     # Parse tiempo (supports H:MM format like 1:20 = 1 hour 20 mins = 80 mins)
     def parse_time(t):
-        if pd.isna(t) or t == '': 
+        if pd.isna(t) or t == '':
             return 0
         try:
             parts = str(t).split(':')
@@ -43,14 +49,14 @@ def load_data():
             return 0
         except:
             return 0
-    
+
     df['Tiempo_mins'] = df['Tiempo'].apply(parse_time)
-    
+
     # Filter out ignored orders for performance metrics
     # Treat NaN as False (don't ignore), only filter out explicit True values
     df.loc[df['Ignorar'].isna(), 'Ignorar'] = False
     df_filtered = df[df['Ignorar'] == False].copy()
-    
+
     return df, df_filtered
 
 def calculate_earnings(row):
@@ -86,7 +92,9 @@ def today_stats():
             'skus': 0,
             'time': 0,
             'speed': 0,
-            'earned': 0
+            'earned': 0,
+            'date': today.strftime('%d/%m/%Y'),
+            'date_formatted': today.strftime('%d de %B')
         })
     
     total_skus = today_orders['SKUs'].sum()
@@ -106,7 +114,9 @@ def today_stats():
         'skus': int(total_skus),
         'time': int(total_time),
         'speed': round(speed, 1),
-        'earned': int(earned)
+        'earned': int(earned),
+        'date': today.strftime('%d/%m/%Y'),
+        'date_formatted': today.strftime('%d de %B')
     })
 
 @app.route('/api/week')
@@ -126,7 +136,10 @@ def week_stats():
             'skus': 0,
             'time': 0,
             'speed': 0,
-            'earned': 0
+            'earned': 0,
+            'week_start': week_start.strftime('%d/%m'),
+            'week_end': today.strftime('%d/%m'),
+            'date_formatted': f"{week_start.strftime('%d/%m')} - {today.strftime('%d/%m')}"
         })
     
     total_skus = week_orders['SKUs'].sum()
@@ -146,7 +159,10 @@ def week_stats():
         'skus': int(total_skus),
         'time': int(total_time),
         'speed': round(speed, 1),
-        'earned': int(earned)
+        'earned': int(earned),
+        'week_start': week_start.strftime('%d/%m'),
+        'week_end': today.strftime('%d/%m'),
+        'date_formatted': f"{week_start.strftime('%d/%m')} - {today.strftime('%d/%m')}"
     })
 
 @app.route('/api/recent')
@@ -230,12 +246,20 @@ def month_stats():
     month_complete['earnings'] = earnings
     total_earned = int(month_complete['earnings'].sum())
     
+    # Format month name in Spanish
+    month_names_es = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+    month_name = month_names_es[now.month - 1]
+    
     return jsonify({
         'orders': total_orders,
         'skus': total_skus,
         'time': total_time,
         'speed': round(speed, 1),
-        'earned': total_earned
+        'earned': total_earned,
+        'month': now.month,
+        'year': now.year,
+        'date_formatted': f"{month_name} {now.year}"
     })
 
 @app.route('/api/bests')
@@ -250,11 +274,13 @@ def personal_bests():
             'best_speed': None
         })
     
-    # Calculate speed for each order (SKUs/hour)
+    # Calculate speed and earnings for each order
+    df_filtered = df_filtered.copy()
     df_filtered['speed'] = df_filtered.apply(
         lambda x: round((x['SKUs'] / x['Tiempo_mins'] * 60), 1) if x['Tiempo_mins'] > 0 else 0,
         axis=1
     )
+    df_filtered['earnings'] = df_filtered.apply(calculate_earnings, axis=1)
     
     # Fastest order (shortest time with at least 10 SKUs)
     big_orders = df_filtered[df_filtered['SKUs'] >= 10].copy()
@@ -264,7 +290,11 @@ def personal_bests():
         fastest = {
             'time': int(fastest_row['Tiempo_mins']),
             'skus': int(fastest_row['SKUs']),
-            'cliente': str(fastest_row['Cliente'])[:20]
+            'cliente': str(fastest_row['Cliente'])[:20],
+            'fecha': fastest_row['Fecha'].strftime('%d/%m/%Y') if pd.notna(fastest_row['Fecha']) else '',
+            'speed': round(fastest_row['speed'], 1),
+            'earnings': int(fastest_row['earnings']),
+            'tiempo': str(fastest_row.get('Tiempo', ''))
         }
     
     # Most SKUs in one order
@@ -272,7 +302,11 @@ def personal_bests():
     most_skus = {
         'skus': int(most_skus_row['SKUs']),
         'time': int(most_skus_row['Tiempo_mins']),
-        'cliente': str(most_skus_row['Cliente'])[:20]
+        'cliente': str(most_skus_row['Cliente'])[:20],
+        'fecha': most_skus_row['Fecha'].strftime('%d/%m/%Y') if pd.notna(most_skus_row['Fecha']) else '',
+        'speed': round(most_skus_row['speed'], 1),
+        'earnings': int(most_skus_row['earnings']),
+        'tiempo': str(most_skus_row.get('Tiempo', ''))
     }
     
     # Best speed (min 10 SKUs)
@@ -283,7 +317,10 @@ def personal_bests():
             'speed': round(best_speed_row['speed'], 1),
             'skus': int(best_speed_row['SKUs']),
             'time': int(best_speed_row['Tiempo_mins']),
-            'cliente': str(best_speed_row['Cliente'])[:20]
+            'cliente': str(best_speed_row['Cliente'])[:20],
+            'fecha': best_speed_row['Fecha'].strftime('%d/%m/%Y') if pd.notna(best_speed_row['Fecha']) else '',
+            'earnings': int(best_speed_row['earnings']),
+            'tiempo': str(best_speed_row.get('Tiempo', ''))
         }
     
     return jsonify({
