@@ -28,13 +28,17 @@ def load_data():
     df = pd.read_csv(StringIO(csv_text))
 
     # Normalize string columns to fix encoding issues
-    for col in ['Cliente', 'Marca', 'Producto', 'Ubicacion', 'Estante', 'Pasillo']:
+    for col in ['Cliente', 'Marca', 'Producto', 'Ubicacion', 'Estante', 'Pasillo', 'Tipo']:
         if col in df.columns:
             df[col] = df[col].astype(str).apply(lambda x: x.encode('latin1').decode('utf-8') if '\ufffd' in x or 'Ã' in x else x)
 
     # Process data
     df['Fecha'] = pd.to_datetime(df['Fecha'], format='%d/%m/%Y', errors='coerce')
     df['SKUs'] = pd.to_numeric(df['SKUs'], errors='coerce').fillna(0).astype(int)
+    
+    # Handle Tipo column (if present)
+    if 'Tipo' not in df.columns:
+        df['Tipo'] = 'Mono'  # Default to Mono if no Tipo column
 
     # Parse tiempo (supports H:MM format like 1:20 = 1 hour 20 mins = 80 mins)
     def parse_time(t):
@@ -60,15 +64,29 @@ def load_data():
     return df, df_filtered
 
 def calculate_earnings(row):
-    """Calculate earnings for an order - assumes Mono picking"""
+    """Calculate earnings for an order - handles both Mono and Bipicking"""
     skus = row.get('SKUs', 0)
+    fecha = row.get('Fecha')
+    cliente = str(row.get('Cliente', ''))
     
-    # Default to Mono pricing (75 CLP/SKU + 1300 base)
-    # You can add Tipo/Bipicking columns later if needed
-    base = 75 * skus + 1300
+    # Check for explicit Tipo column first
+    if 'Tipo' in row and pd.notna(row['Tipo']) and str(row['Tipo']).strip():
+        tipo_str = str(row['Tipo']).lower().strip()
+        is_bipicking = tipo_str in ['bi', 'bipicking', 'bip', 'b']
+    else:
+        # Bipicking detection based on client name containing (A) or (B)
+        is_bipicking = '(A)' in cliente or '(B)' in cliente
+    
+    # Calculate base earnings based on your actual October rates
+    if is_bipicking:
+        # Bipicking: 60 CLP/SKU + 1040 base (from your Oct data: $1,040 base)
+        base = 60 * skus + 1040
+    else:
+        # Mono picking: 75 CLP/SKU + 1300 base (from your Oct data: $1,300 base)
+        base = 75 * skus + 1300
     
     # Sunday multiplier (1.2x)
-    if pd.notna(row.get('Fecha')) and row['Fecha'].weekday() == 6:
+    if pd.notna(fecha) and hasattr(fecha, 'weekday') and fecha.weekday() == 6:
         base *= 1.2
     
     return int(base)
@@ -84,9 +102,10 @@ def today_stats():
     df, df_filtered = load_data()
     
     today = datetime.now().date()
-    today_orders = df_filtered[df_filtered['Fecha'].dt.date == today]
+    today_orders_all = df[df['Fecha'].dt.date == today]  # All orders including ignored
+    today_orders_filtered = df_filtered[df_filtered['Fecha'].dt.date == today]  # Non-ignored only
     
-    if len(today_orders) == 0:
+    if len(today_orders_all) == 0:
         return jsonify({
             'orders': 0,
             'skus': 0,
@@ -97,20 +116,19 @@ def today_stats():
             'date_formatted': today.strftime('%d de %B')
         })
     
-    total_skus = today_orders['SKUs'].sum()
-    total_time = today_orders['Tiempo_mins'].sum()
+    # Performance metrics from non-ignored orders only
+    total_skus = today_orders_filtered['SKUs'].sum()
+    total_time = today_orders_filtered['Tiempo_mins'].sum()
     speed = (total_skus / total_time * 60) if total_time > 0 else 0
     
-    # Calculate earnings (use ALL orders including ignored)
-    today_all = df[df['Fecha'].dt.date == today].copy()
+    # Calculate earnings from ALL orders (including ignored)
     earnings = []
-    for _, row in today_all.iterrows():
+    for _, row in today_orders_all.iterrows():
         earnings.append(calculate_earnings(row))
-    today_all['earnings'] = earnings
-    earned = today_all['earnings'].sum()
+    earned = sum(earnings)
     
     return jsonify({
-        'orders': len(today_orders),
+        'orders': len(today_orders_all),  # Count ALL orders
         'skus': int(total_skus),
         'time': int(total_time),
         'speed': round(speed, 1),
@@ -127,10 +145,12 @@ def week_stats():
     today = datetime.now().date()
     week_start = today - timedelta(days=today.weekday())
     
-    week_orders = df_filtered[(df_filtered['Fecha'].dt.date >= week_start) & 
-                              (df_filtered['Fecha'].dt.date <= today)]
+    week_orders_all = df[(df['Fecha'].dt.date >= week_start) & 
+                         (df['Fecha'].dt.date <= today)]  # All orders including ignored
+    week_orders_filtered = df_filtered[(df_filtered['Fecha'].dt.date >= week_start) & 
+                                       (df_filtered['Fecha'].dt.date <= today)]  # Non-ignored only
     
-    if len(week_orders) == 0:
+    if len(week_orders_all) == 0:
         return jsonify({
             'orders': 0,
             'skus': 0,
@@ -142,20 +162,19 @@ def week_stats():
             'date_formatted': f"{week_start.strftime('%d/%m')} - {today.strftime('%d/%m')}"
         })
     
-    total_skus = week_orders['SKUs'].sum()
-    total_time = week_orders['Tiempo_mins'].sum()
+    # Performance metrics from non-ignored orders only
+    total_skus = week_orders_filtered['SKUs'].sum()
+    total_time = week_orders_filtered['Tiempo_mins'].sum()
     speed = (total_skus / total_time * 60) if total_time > 0 else 0
     
-    # Calculate earnings
-    week_all = df[(df['Fecha'].dt.date >= week_start) & (df['Fecha'].dt.date <= today)].copy()
+    # Calculate earnings from ALL orders (including ignored)
     earnings = []
-    for _, row in week_all.iterrows():
+    for _, row in week_orders_all.iterrows():
         earnings.append(calculate_earnings(row))
-    week_all['earnings'] = earnings
-    earned = week_all['earnings'].sum()
+    earned = sum(earnings)
     
     return jsonify({
-        'orders': len(week_orders),
+        'orders': len(week_orders_all),  # Count ALL orders
         'skus': int(total_skus),
         'time': int(total_time),
         'speed': round(speed, 1),
@@ -176,13 +195,26 @@ def recent_orders():
     for _, row in recent.iterrows():
         time_mins = row['Tiempo_mins']
         speed = (row['SKUs'] / time_mins * 60) if time_mins > 0 else 0
+        earnings = calculate_earnings(row)
+        
+        # Determine order type for display
+        cliente = str(row.get('Cliente', ''))
+        
+        if 'Tipo' in row and pd.notna(row['Tipo']) and str(row['Tipo']).strip():
+            tipo_str = str(row['Tipo']).lower().strip()
+            order_type = 'Bipicking' if tipo_str in ['bi', 'bipicking', 'bip', 'b'] else 'Mono'
+        else:
+            # Bipicking detection based on client name containing (A) or (B)
+            order_type = 'Bipicking' if ('(A)' in cliente or '(B)' in cliente) else 'Mono'
         
         orders.append({
             'fecha': row['Fecha'].strftime('%d/%m') if pd.notna(row['Fecha']) else '',
             'cliente': str(row.get('Cliente', ''))[:20],
             'skus': int(row['SKUs']),
             'tiempo': str(row.get('Tiempo', '')),
-            'speed': round(speed, 1)
+            'speed': round(speed, 1),
+            'earnings': earnings,
+            'tipo': order_type
         })
     
     return jsonify(orders)
@@ -229,22 +261,20 @@ def month_stats():
     # Current month
     now = datetime.now()
     month_start = datetime(now.year, now.month, 1).date()
-    month_orders = df_filtered[df_filtered['Fecha'].dt.date >= month_start]
-    month_complete = df[df['Fecha'].dt.date >= month_start]  # For earnings
+    month_orders_all = df[df['Fecha'].dt.date >= month_start]  # All orders including ignored
+    month_orders_filtered = df_filtered[df_filtered['Fecha'].dt.date >= month_start]  # Non-ignored only
     
-    total_orders = len(month_orders)
-    total_skus = int(month_orders['SKUs'].sum())
-    total_time = int(month_orders['Tiempo_mins'].sum())
+    total_orders = len(month_orders_all)  # Count ALL orders
+    total_skus = int(month_orders_filtered['SKUs'].sum())  # Performance metrics from non-ignored
+    total_time = int(month_orders_filtered['Tiempo_mins'].sum())
     
     speed = (total_skus / total_time * 60) if total_time > 0 else 0
     
-    # Calculate total earnings
-    month_complete = month_complete.copy()
+    # Calculate total earnings from ALL orders (including ignored)
     earnings = []
-    for _, row in month_complete.iterrows():
+    for _, row in month_orders_all.iterrows():
         earnings.append(calculate_earnings(row))
-    month_complete['earnings'] = earnings
-    total_earned = int(month_complete['earnings'].sum())
+    total_earned = int(sum(earnings))
     
     # Format month name in Spanish
     month_names_es = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -586,38 +616,43 @@ def daily_orders():
     try:
         df, df_filtered = load_data()
         
-        # Group orders by date
+        # Group orders by date - use full df to get all dates including ignored orders
         daily_data = []
-        dates = df_filtered['Fecha'].dt.date.unique()
+        dates = df['Fecha'].dt.date.unique()
         dates = sorted([d for d in dates if pd.notna(d)], reverse=True)
         
         for date in dates:
-            day_orders = df_filtered[df_filtered['Fecha'].dt.date == date]
+            # All orders for the day (including ignored)
+            day_orders_all = df[df['Fecha'].dt.date == date]
+            # Non-ignored orders for performance metrics
+            day_orders_filtered = df_filtered[df_filtered['Fecha'].dt.date == date]
             
-            # Calculate earnings for the day
+            # Calculate earnings for ALL orders (including ignored)
             earnings = []
-            for _, row in day_orders.iterrows():
+            for _, row in day_orders_all.iterrows():
                 earnings.append(calculate_earnings(row))
             
             daily_data.append({
                 'date': date.strftime('%Y-%m-%d'),
                 'date_formatted': date.strftime('%d/%m/%Y'),
                 'weekday': date.strftime('%A'),
-                'orders_count': len(day_orders),
-                'total_skus': int(day_orders['SKUs'].sum()),
-                'total_time_mins': int(day_orders['Tiempo_mins'].sum()),
+                'orders_count': len(day_orders_all),  # Count ALL orders
+                'total_skus': int(day_orders_filtered['SKUs'].sum()),  # Performance metrics from non-ignored
+                'total_time_mins': int(day_orders_filtered['Tiempo_mins'].sum()),
                 'total_earned': sum(earnings),
-                'avg_skus_per_order': round(day_orders['SKUs'].mean(), 1) if len(day_orders) > 0 else 0,
-                'speed': round((day_orders['SKUs'].sum() / day_orders['Tiempo_mins'].sum() * 60), 1) if day_orders['Tiempo_mins'].sum() > 0 else 0,
+                'avg_skus_per_order': round(day_orders_filtered['SKUs'].mean(), 1) if len(day_orders_filtered) > 0 else 0,
+                'speed': round((day_orders_filtered['SKUs'].sum() / day_orders_filtered['Tiempo_mins'].sum() * 60), 1) if day_orders_filtered['Tiempo_mins'].sum() > 0 else 0,
                 'orders': [
                     {
                         'cliente': row['Cliente'],
                         'skus': int(row['SKUs']),
                         'tiempo': row['Tiempo'],
                         'tiempo_mins': int(row['Tiempo_mins']),
-                        'earnings': calculate_earnings(row)
+                        'earnings': calculate_earnings(row),
+                        'ignored': bool(row.get('Ignorar', False)),  # Include ignored flag
+                        'tipo': 'Bipicking' if ('(A)' in str(row.get('Cliente', '')) or '(B)' in str(row.get('Cliente', ''))) else 'Mono'
                     }
-                    for _, row in day_orders.iterrows()
+                    for _, row in day_orders_all.iterrows()  # Show ALL orders
                 ]
             })
         
@@ -632,50 +667,51 @@ def monthly_orders():
     try:
         df, df_filtered = load_data()
         
-        # Group orders by month
-        df_filtered['year_month'] = df_filtered['Fecha'].dt.to_period('M')
+        # Group orders by month - use ALL orders to get all months
+        df['year_month'] = df['Fecha'].dt.to_period('M')
         monthly_data = []
         
-        months = df_filtered['year_month'].unique()
+        months = df['year_month'].unique()
         months = sorted([m for m in months if pd.notna(m)], reverse=True)
         
         for month in months:
-            month_orders = df_filtered[df_filtered['year_month'] == month]
+            month_orders_all = df[df['year_month'] == month]  # All orders including ignored
+            month_orders_filtered = df_filtered[df_filtered['Fecha'].dt.to_period('M') == month]  # Non-ignored only
             
-            # Calculate earnings for the month
+            # Calculate earnings for ALL orders (including ignored)
             earnings = []
-            for _, row in month_orders.iterrows():
+            for _, row in month_orders_all.iterrows():
                 earnings.append(calculate_earnings(row))
             
-            # Group by days in the month
+            # Group by days in the month - show all days with orders
             daily_breakdown = []
-            days = month_orders['Fecha'].dt.date.unique()
+            days = month_orders_all['Fecha'].dt.date.unique()
             days = sorted([d for d in days if pd.notna(d)])
             
             for day in days:
-                day_orders = month_orders[month_orders['Fecha'].dt.date == day]
+                day_orders_all = month_orders_all[month_orders_all['Fecha'].dt.date == day]
                 day_earnings = []
-                for _, row in day_orders.iterrows():
+                for _, row in day_orders_all.iterrows():
                     day_earnings.append(calculate_earnings(row))
                 
                 daily_breakdown.append({
                     'date': day.strftime('%Y-%m-%d'),
                     'date_formatted': day.strftime('%d/%m'),
                     'weekday': day.strftime('%a'),
-                    'orders_count': len(day_orders),
-                    'total_skus': int(day_orders['SKUs'].sum()),
+                    'orders_count': len(day_orders_all),  # Count ALL orders
+                    'total_skus': int(day_orders_all['SKUs'].sum()),
                     'total_earned': sum(day_earnings)
                 })
             
             monthly_data.append({
                 'month': str(month),
                 'month_formatted': month.strftime('%B %Y'),
-                'orders_count': len(month_orders),
-                'total_skus': int(month_orders['SKUs'].sum()),
-                'total_time_mins': int(month_orders['Tiempo_mins'].sum()),
+                'orders_count': len(month_orders_all),  # Count ALL orders
+                'total_skus': int(month_orders_filtered['SKUs'].sum()),  # Performance metrics from non-ignored
+                'total_time_mins': int(month_orders_filtered['Tiempo_mins'].sum()),
                 'total_earned': sum(earnings),
-                'avg_skus_per_order': round(month_orders['SKUs'].mean(), 1) if len(month_orders) > 0 else 0,
-                'speed': round((month_orders['SKUs'].sum() / month_orders['Tiempo_mins'].sum() * 60), 1) if month_orders['Tiempo_mins'].sum() > 0 else 0,
+                'avg_skus_per_order': round(month_orders_filtered['SKUs'].mean(), 1) if len(month_orders_filtered) > 0 else 0,
+                'speed': round((month_orders_filtered['SKUs'].sum() / month_orders_filtered['Tiempo_mins'].sum() * 60), 1) if month_orders_filtered['Tiempo_mins'].sum() > 0 else 0,
                 'working_days': len(days),
                 'daily_breakdown': daily_breakdown
             })
