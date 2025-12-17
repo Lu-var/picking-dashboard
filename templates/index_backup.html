@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Picking Stats</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,sans-serif;background:linear-gradient(135deg,#0f172a,#1e293b);color:#e2e8f0;padding:16px 16px 140px;min-height:100vh}
+.header{text-align:center;margin-bottom:24px}
+.header h1{font-size:28px;font-weight:700;background:linear-gradient(135deg,#3b82f6,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+.header .subtitle{color:#94a3b8;font-size:14px}
+.nav-tabs{display:flex;gap:8px;overflow-x:auto;padding:8px 0;margin-bottom:20px}
+.nav-tab{flex-shrink:0;padding:10px 20px;border-radius:12px;background:rgba(30,41,59,0.5);border:1px solid rgba(100,116,139,0.2);color:#94a3b8;font-size:14px;font-weight:600;cursor:pointer}
+.nav-tab.active{background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:white}
+.section{display:none}
+.section.active{display:block}
+.card{background:rgba(30,41,59,0.7);border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 4px 6px rgba(0,0,0,0.3);border:1px solid rgba(100,116,139,0.2)}
+.card-title{font-size:16px;font-weight:600;margin-bottom:16px;color:#cbd5e1}
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.stat{background:rgba(15,23,42,0.5);padding:16px;border-radius:12px}
+.stat-label{font-size:12px;color:#94a3b8;margin-bottom:6px}
+.stat-value{font-size:24px;font-weight:700;color:#f1f5f9}
+.stat-value.highlight{color:#3b82f6}
+.stat-value.success{color:#10b981}
+.trend{display:inline-block;padding:4px 10px;border-radius:12px;font-size:13px;margin-top:8px}
+.trend.up{background:rgba(16,185,129,0.2);color:#10b981}
+.trend.down{background:rgba(239,68,68,0.2);color:#ef4444}
+.order-list{list-style:none}
+.order-item{background:rgba(15,23,42,0.5);padding:14px;border-radius:10px;margin-bottom:10px;display:flex;justify-content:space-between}
+.order-cliente{font-weight:600;color:#f1f5f9}
+.order-details{font-size:13px;color:#94a3b8}
+.order-speed{font-size:18px;font-weight:700;color:#3b82f6}
+.best-item{background:rgba(15,23,42,0.5);padding:12px;border-radius:10px;margin-bottom:10px;border-left:3px solid #3b82f6}
+.best-title{font-size:13px;color:#3b82f6;font-weight:600}
+.best-value{font-size:20px;font-weight:700;color:#f1f5f9}
+.best-details{font-size:12px;color:#94a3b8}
+.refresh-btn{position:fixed;bottom:80px;right:20px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#8b5cf6);border:none;color:white;font-size:24px;cursor:pointer;z-index:100}
+.loading{text-align:center;padding:40px;color:#94a3b8}
+.map-container{background:rgba(15,23,42,0.5);border-radius:12px;padding:16px;overflow:auto}
+.map-svg{width:100%;height:auto;min-height:500px}
+.legend{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:16px}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:12px;color:#cbd5e1}
+.legend-color{width:20px;height:20px;border-radius:4px;flex-shrink:0}
+.zone-label{font-size:10px;fill:#f1f5f9;pointer-events:none}
+.zone-rect{stroke-width:1;stroke:rgba(255,255,255,0.1)}
+.zone-rect:hover{stroke:#3b82f6;stroke-width:2}
+.wall-rect{fill:none;stroke-width:2}
+.aisle-rect{opacity:0.5}
+.search-box{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(100,116,139,0.4);background:rgba(15,23,42,0.5);color:#f1f5f9;font-size:16px;margin-bottom:16px}
+.search-box:focus{outline:none;border-color:#3b82f6;background:rgba(15,23,42,0.8)}
+.product-item{background:rgba(15,23,42,0.5);padding:16px;border-radius:12px;margin-bottom:12px;border-left:3px solid #3b82f6}
+.product-name{font-weight:600;color:#f1f5f9;margin-bottom:4px}
+.product-brand{color:#3b82f6;font-weight:600;font-size:14px}
+.product-details{color:#94a3b8;font-size:13px;margin-top:8px}
+.product-location{background:rgba(59,130,246,0.1);padding:4px 8px;border-radius:6px;color:#3b82f6;font-size:12px;display:inline-block;margin-top:6px}
+.brand-item{background:rgba(15,23,42,0.5);padding:14px;border-radius:10px;margin-bottom:10px;display:flex;justify-content:between;align-items:center}
+.brand-name{font-weight:600;color:#f1f5f9;flex-grow:1}
+.brand-count{background:rgba(59,130,246,0.2);color:#3b82f6;padding:4px 8px;border-radius:6px;font-size:12px;font-weight:600}
+.location-item{cursor:pointer;transition:background 0.2s}
+.location-item:hover{background:rgba(59,130,246,0.1)}
+.tabs-secondary{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto}
+.tab-secondary{flex-shrink:0;padding:8px 16px;border-radius:8px;background:rgba(15,23,42,0.3);color:#94a3b8;font-size:13px;cursor:pointer;border:1px solid rgba(100,116,139,0.1)}
+.tab-secondary.active{background:rgba(59,130,246,0.2);color:#3b82f6;border-color:rgba(59,130,246,0.3)}
+.pagination-btn{padding:8px 16px;border-radius:8px;background:rgba(59,130,246,0.1);color:#3b82f6;border:1px solid rgba(59,130,246,0.3);cursor:pointer;font-size:13px}
+.pagination-btn:hover{background:rgba(59,130,246,0.2)}
+.expandable-section{background:rgba(15,23,42,0.5);border-radius:12px;margin-bottom:12px;overflow:hidden;border:1px solid rgba(100,116,139,0.2)}
+.section-header{padding:16px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:background 0.2s}
+.section-header:hover{background:rgba(59,130,246,0.1)}
+.expand-icon{font-size:14px;color:#3b82f6}
+.section-info{flex:1;display:flex;align-items:center;gap:12px}
+.section-details{flex:1}
+.section-title{font-weight:600;color:#f1f5f9;margin-bottom:4px}
+.section-stats{color:#94a3b8;font-size:13px;margin-bottom:2px}
+.section-price,.section-brands{color:#3b82f6;font-size:12px}
+.expanded-content{padding:0 16px 16px;border-top:1px solid rgba(100,116,139,0.1)}
+.product-item-mini{background:rgba(30,41,59,0.5);padding:12px;border-radius:8px;margin:8px 0;border-left:2px solid #3b82f6}
+.product-item-mini .product-name{font-weight:500;color:#f1f5f9;font-size:14px;margin-bottom:4px}
+.product-item-mini .product-brand{color:#3b82f6;font-weight:600;font-size:12px;margin-bottom:2px}
+.product-item-mini .product-details{color:#94a3b8;font-size:12px}
+.more-items{text-align:center;color:#64748b;font-style:italic;padding:8px;font-size:12px}
+.order-item-card{background:rgba(15,23,42,0.5);padding:14px;border-radius:10px;margin-bottom:10px;border-left:3px solid #10b981}
+.order-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.order-cliente{font-weight:600;color:#f1f5f9}
+.order-speed-badge{background:rgba(16,185,129,0.2);color:#10b981;padding:4px 8px;border-radius:6px;font-size:12px;font-weight:600}
+.order-list-container{max-height:400px;overflow-y:auto}
+.day-summary{background:rgba(15,23,42,0.5);padding:14px;border-radius:10px;margin-bottom:8px;cursor:pointer;border-left:3px solid #3b82f6;transition:all 0.2s}
+.day-summary:hover{background:rgba(59,130,246,0.1)}
+.day-summary.expanded{border-left-color:#10b981}
+.day-header{display:flex;justify-content:space-between;align-items:center}
+.day-date{font-weight:600;color:#f1f5f9;font-size:14px}
+.day-stats{color:#94a3b8;font-size:12px;margin-top:2px}
+.day-speed{color:#3b82f6;font-weight:600}
+.expanded-orders{margin-top:12px;padding-top:12px;border-top:1px solid rgba(100,116,139,0.2)}
+.order-detail{background:rgba(30,41,59,0.3);padding:10px;border-radius:6px;margin:6px 0;font-size:13px}
+.order-stats{display:flex;gap:12px;margin-top:4px;color:#94a3b8;font-size:11px}
+.month-summary{background:rgba(15,23,42,0.5);padding:16px;border-radius:12px;margin-bottom:12px;border-left:4px solid #8b5cf6}
+.month-header{margin-bottom:12px}
+.month-title{font-weight:700;color:#f1f5f9;font-size:16px;margin-bottom:6px}
+.month-totals{color:#94a3b8;font-size:13px;margin-bottom:6px}
+.month-metrics{display:flex;gap:16px;color:#8b5cf6;font-size:12px;font-weight:600}
+.daily-breakdown{display:grid;grid-template-columns:repeat(auto-fit,minmax(60px,1fr));gap:4px}
+.mini-day{background:rgba(30,41,59,0.4);padding:6px;border-radius:4px;text-align:center}
+.mini-date{font-size:11px;font-weight:600;color:#f1f5f9}
+.mini-stats{font-size:10px;color:#94a3b8}
+.category-card{background:rgba(15,23,42,0.5);padding:16px;border-radius:12px;margin-bottom:12px;border-left:4px solid #f59e0b}
+.category-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.category-icon{font-size:24px}
+.category-title{font-weight:600;color:#f1f5f9;font-size:15px;margin-bottom:4px}
+.category-stats{color:#94a3b8;font-size:12px}
+.category-preview{border-top:1px solid rgba(100,116,139,0.1);padding-top:12px}
+.mini-product{background:rgba(30,41,59,0.3);padding:8px;border-radius:6px;margin:4px 0;font-size:12px;color:#e2e8f0}
+</style>
+</head>
+<body>
+<div class="header">
+<h1>📊 Picking Stats</h1>
+<div class="subtitle" id="lastUpdate">Cargando...</div>
+</div>
+<div class="nav-tabs">
+<div class="nav-tab active" onclick="showSection('overview')">📊 Resumen</div>
+<div class="nav-tab" onclick="showSection('records')">🏆 Records</div>
+<div class="nav-tab" onclick="showSection('orders')">📋 Pedidos</div>
+<div class="nav-tab" onclick="showSection('analytics')">📈 Análisis</div>
+<div class="nav-tab" onclick="showSection('simulations')">🎯 Simulaciones</div>
+<div class="nav-tab" onclick="showSection('products')">🔍 Productos</div>
+<div class="nav-tab" onclick="showSection('map')">🗺️ Mapa</div>
+</div>
+<div id="content">
+<div class="loading">Cargando datos...</div>
+</div>
+<button class="refresh-btn" onclick="refreshData()">🔄</button>
+<script>
+// Helper function for local decimal formatting (Spanish/Latin American format)
+function formatLocalNumber(num) {
+    if (typeof num !== 'number') return num;
+    return new Intl.NumberFormat('es-CL', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+    }).format(num);
+}
+
+let currentSection='overview',cachedData=null,layoutData=null,recordsData=null,productData=null,currentProductTab='browse',currentBrowseSort='name',currentBrowsePage=1,browseData=null;
+function showSection(s){currentSection=s;document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));event.target.classList.add('active');if(s==='map'&&!layoutData)fetchLayout();if(s==='records'&&!recordsData)fetchRecords();if(s==='analytics'&&!recordsData){console.log('Fetching records for analytics');fetchRecords();}if(s==='products'&&!productData)fetchProductData();if(cachedData)renderDashboard(cachedData);}
+async function fetchProductData(){try{const [brands,locations,summary]=await Promise.all([fetch('/api/products/brands').then(r=>r.json()),fetch('/api/products/locations').then(r=>r.json()),fetch('/api/products/database').then(r=>r.json())]);productData={brands,locations,summary};if(currentProductTab==='browse'&&!browseData){loadBrowseData();}renderDashboard(cachedData);}catch(e){console.error('Error loading product data:',e);}}
+async function searchProducts(q){if(!q||q.length<2)return[];try{const r=await fetch(`/api/products/search?q=${encodeURIComponent(q)}&limit=10`);return await r.json();}catch(e){console.error('Error searching products:',e);return[];}}
+async function getProductsByLocation(location){try{const r=await fetch(`/api/products/by-location?location=${encodeURIComponent(location)}`);return await r.json();}catch(e){console.error('Error fetching products by location:',e);return {products:[]};}}
+function showProductTab(tab){currentProductTab=tab;document.querySelectorAll('.tab-secondary').forEach(t=>t.classList.remove('active'));event.target.classList.add('active');if(tab==='browse'&&!browseData)loadBrowseData();renderDashboard(cachedData);}
+async function loadBrowseData(){try{const r=await fetch(`/api/products/browse?sort=${currentBrowseSort}&order=asc&page=${currentBrowsePage}&per_page=20`);browseData=await r.json();if(currentProductTab==='browse'){renderBrowseResults();}}catch(e){console.error('Error loading browse data:',e);}}
+function setBrowseSort(sort){currentBrowseSort=sort;currentBrowsePage=1;browseData=null;document.querySelectorAll('.tab-secondary').forEach(t=>t.classList.remove('active'));event.target.classList.add('active');loadBrowseData();}
+function renderBrowseResults(){if(!browseData)return;const resultsDiv=document.getElementById('browseResults');if(!resultsDiv){setTimeout(renderBrowseResults,100);return;}let html='';browseData.products.forEach(product=>{html+='<div class="product-item">';html+=`<div class="product-brand">${product.brand}</div>`;html+=`<div class="product-name">${product.name}</div>`;html+=`<div class="product-details">Frecuencia: ${product.frequency} • Precio: $${product.avg_price_per_unit}</div>`;if(product.locations&&product.locations.length>0){html+=`<div class="product-location">${product.locations[0]}</div>`;}html+='</div>';});if(browseData.pagination.pages>1){html+='<div style="text-align:center;margin-top:16px;display:flex;gap:8px;justify-content:center;align-items:center">';if(currentBrowsePage>1){html+=`<button class="pagination-btn" onclick="changeBrowsePage(${currentBrowsePage-1})">⬅️ Anterior</button>`;}html+=`<span style="color:#94a3b8;padding:8px">${currentBrowsePage} / ${browseData.pagination.pages}</span>`;if(currentBrowsePage<browseData.pagination.pages){html+=`<button class="pagination-btn" onclick="changeBrowsePage(${currentBrowsePage+1})">Siguiente ➡️</button>`;}html+='</div>';}resultsDiv.innerHTML=html;}
+function changeBrowsePage(page){currentBrowsePage=page;browseData=null;loadBrowseData();}
+async function fetchData(){try{const [today,week,month,recent,stats,bests,allTime]=await Promise.all([fetch('/api/today').then(r=>r.json()),fetch('/api/week').then(r=>r.json()),fetch('/api/month').then(r=>r.json()),fetch('/api/recent').then(r=>r.json()),fetch('/api/stats').then(r=>r.json()),fetch('/api/bests').then(r=>r.json()),fetch('/api/all_time').then(r=>r.json())]);cachedData={today,week,month,recent,stats,bests,allTime};renderDashboard(cachedData);updateLastRefresh();}catch(e){document.getElementById('content').innerHTML='<div class="loading">Error al cargar datos</div>';}}
+async function fetchLayout(){try{const r=await fetch('/api/layout');layoutData=await r.json();renderDashboard(cachedData);}catch(e){console.error('Error loading layout:',e);}}
+async function fetchRecords(){try{const r=await fetch('/api/records_detailed');recordsData=await r.json();renderDashboard(cachedData);}catch(e){console.error('Error loading records:',e);}}
+function renderDashboard(d){const {today,week,month,recent,stats,bests,allTime}=d;const c=document.getElementById('content');let h='';if(currentSection==='overview'){h=renderOverview(today,week,month,stats,allTime,recordsData);}else if(currentSection==='records'){h=recordsData?renderRecords(bests,recordsData):`<div class="section active"><div class="card"><div class="card-title">Records Personales</div>${bests.fastest_order?`<div class="best-item"><div class="best-title">Más Rápido</div><div class="best-value">${bests.fastest_order.time} mins</div><div class="best-details">${bests.fastest_order.skus} SKUs - ${bests.fastest_order.cliente}</div></div>`:''}${bests.most_skus?`<div class="best-item"><div class="best-title">Más SKUs</div><div class="best-value">${bests.most_skus.skus} SKUs</div><div class="best-details">${bests.most_skus.time} mins - ${bests.most_skus.cliente}</div></div>`:''}${bests.best_speed?`<div class="best-item"><div class="best-title">Mejor Velocidad</div><div class="best-value">${bests.best_speed.speed} SKUs/h</div><div class="best-details">${bests.best_speed.skus} SKUs - ${bests.best_speed.cliente}</div></div>`:''}  </div><div class="loading">Cargando análisis detallado...</div></div>`;}else if(currentSection==='orders'){h=renderOrders(recent,recordsData);}else if(currentSection==='analytics'){h=recordsData?renderAnalytics(recordsData):'<div class="section active"><div class="loading">Cargando análisis de rendimiento...</div></div>';}else if(currentSection==='simulations'){h=renderSimulations(allTime,today,week,month,recordsData);}else if(currentSection==='products'){h=productData?renderProducts(productData):'<div class="loading">Cargando base de datos de productos...</div>';}else if(currentSection==='map'){h=layoutData?renderMap(layoutData):'<div class="loading">Cargando mapa...</div>';}c.innerHTML=h;if(currentSection==='simulations'){setTimeout(updateGoalCalculator,50);}}
+
+function renderOverview(today, week, month, stats, allTime, records) {
+    let html = '<div class="section active">';
+    
+    // Performance indicator function
+    const getEfficiencyBadge = (speed) => {
+        if (speed >= 30) return { emoji: '🔥', text: 'Excelente', color: '#ef4444' };
+        if (speed >= 25) return { emoji: '⚡', text: 'Muy Bueno', color: '#f59e0b' };
+        if (speed >= 20) return { emoji: '👍', text: 'Bueno', color: '#10b981' };
+        if (speed >= 15) return { emoji: '📈', text: 'Regular', color: '#3b82f6' };
+        return { emoji: '🎯', text: 'Mejorando', color: '#6b7280' };
+    };
+
+    // Today section with enhanced details
+    html += '<div class="card">';
+    html += `<div class="card-title">Hoy ${today.date_formatted ? `<span style="font-size:14px;font-weight:normal;color:#94a3b8">(${today.date_formatted})</span>` : ''}</div>`;
+    
+    const todayBadge = getEfficiencyBadge(today.speed);
+    html += `<div style="text-align:center;margin-bottom:16px"><span style="background:${todayBadge.color}20;color:${todayBadge.color};padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600">${todayBadge.emoji} ${todayBadge.text}</span></div>`;
+    
+    html += '<div class="stats-grid">';
+    html += `<div class="stat"><div class="stat-label">Pedidos</div><div class="stat-value highlight">${today.orders}</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">${today.orders === 1 ? 'pedido' : 'pedidos'} completados</div></div>`;
+    html += `<div class="stat"><div class="stat-label">SKUs</div><div class="stat-value">${today.skus}</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">${today.orders > 0 ? Math.round(today.skus / today.orders) : 0} promedio por pedido</div></div>`;
+    html += `<div class="stat"><div class="stat-label">Velocidad</div><div class="stat-value success">${today.speed}</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">SKUs por hora</div></div>`;
+    html += `<div class="stat"><div class="stat-label">Ganado</div><div class="stat-value highlight">$${formatLocalNumber(today.earned)}</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">${today.time > 0 ? '$' + formatLocalNumber(Math.round(today.earned / (today.time / 60))) : '$0'} por tiempo activo</div></div>`;
+    html += '</div></div>';
+
+    // Week section with enhanced comparison
+    html += '<div class="card">';
+    html += `<div class="card-title">Esta Semana ${week.date_formatted ? `<span style="font-size:14px;font-weight:normal;color:#94a3b8">(${week.date_formatted})</span>` : ''}</div>`;
+    
+    const weekBadge = getEfficiencyBadge(week.speed);
+    const weeklyTarget = week.orders * 25; // Target: 25 SKUs/h average
+    const weekProgress = weeklyTarget > 0 ? Math.min(100, (week.speed / 25) * 100) : 0;
+    
+    html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">`;
+    html += `<span style="background:${weekBadge.color}20;color:${weekBadge.color};padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600">${weekBadge.emoji} ${weekBadge.text}</span>`;
+    html += `<span style="font-size:12px;color:#94a3b8">Meta semanal: ${Math.round(weekProgress)}%</span>`;
+    html += `</div>`;
+    
+    html += '<div class="stats-grid">';
+    html += `<div class="stat"><div class="stat-label">Pedidos</div><div class="stat-value">${week.orders}</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">${Math.round(week.orders / 7 * 10) / 10} promedio diario</div></div>`;
+    html += `<div class="stat"><div class="stat-label">SKUs</div><div class="stat-value">${week.skus}</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">${week.time > 0 ? Math.round(week.time / 60 * 10) / 10 : 0} horas de picking</div></div>`;
+    html += `<div class="stat"><div class="stat-label">Velocidad</div><div class="stat-value">${week.speed}</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">${stats.change_percent > 0 ? '↗️' : stats.change_percent < 0 ? '↘️' : '➡️'} ${Math.abs(stats.change_percent)}% vs anterior</div></div>`;
+    html += `<div class="stat"><div class="stat-label">Ganado</div><div class="stat-value highlight">$${formatLocalNumber(week.earned)}</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">$${formatLocalNumber(Math.round(week.earned / 7))} promedio diario</div></div>`;
+    html += '</div></div>';
+
+    // Month section with enhanced projections
+    html += '<div class="card">';
+    html += `<div class="card-title">Este Mes ${month.date_formatted ? `<span style="font-size:14px;font-weight:normal;color:#94a3b8">(${month.date_formatted})</span>` : ''}</div>`;
+    
+    const today_date = new Date();
+    const daysInMonth = new Date(today_date.getFullYear(), today_date.getMonth() + 1, 0).getDate();
+    const daysPassed = today_date.getDate();
+    const monthProgress = Math.round((daysPassed / daysInMonth) * 100);
+    const projectedEarnings = Math.round((month.earned / daysPassed) * daysInMonth);
+    
+    html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">`;
+    html += `<span style="background:rgba(139,92,246,0.2);color:#8b5cf6;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600">📅 ${monthProgress}% del mes</span>`;
+    html += `<span style="font-size:12px;color:#94a3b8">Proyección: $${formatLocalNumber(projectedEarnings)}</span>`;
+    html += `</div>`;
+    
+    html += '<div class="stats-grid">';
+    html += `<div class="stat"><div class="stat-label">Pedidos</div><div class="stat-value">${month.orders}</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">${Math.round(month.orders / daysPassed * 10) / 10} promedio diario</div></div>`;
+    html += `<div class="stat"><div class="stat-label">SKUs</div><div class="stat-value">${month.skus}</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">${month.orders > 0 ? Math.round(month.skus / month.orders) : 0} promedio por pedido</div></div>`;
+    html += `<div class="stat"><div class="stat-label">Velocidad</div><div class="stat-value">${month.speed}</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">SKUs por hora</div></div>`;
+    html += `<div class="stat"><div class="stat-label">Ganado</div><div class="stat-value highlight">$${formatLocalNumber(month.earned)}</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">$${formatLocalNumber(Math.round(month.earned / daysPassed))} promedio diario</div></div>`;
+    html += '</div></div>';
+
+    // Enhanced trend section
+    html += '<div class="card"><div class="card-title">🎯 Análisis de Tendencia</div>';
+    html += '<div style="text-align:center;margin-bottom:16px">';
+    html += `<div style="font-size:32px;font-weight:700;margin:16px 0;color:${stats.recent_speed >= 25 ? '#10b981' : stats.recent_speed >= 20 ? '#3b82f6' : '#f59e0b'}">${stats.recent_speed} SKUs/h</div>`;
+    const trendColor = stats.change_percent > 0 ? '#10b981' : stats.change_percent < 0 ? '#ef4444' : '#6b7280';
+    html += `<div class="trend" style="background:${trendColor}20;color:${trendColor}">${stats.change_percent > 0 ? '↗️ Mejorando' : stats.change_percent < 0 ? '↘️ Bajando' : '➡️ Estable'} ${Math.abs(stats.change_percent)}%</div>`;
+    html += '</div>';
+    
+    // Performance insights
+    html += '<div style="background:rgba(15,23,42,0.5);padding:12px;border-radius:8px;margin-top:12px">';
+    if (stats.change_percent > 5) {
+        html += '<div style="color:#10b981;font-size:13px;">🚀 ¡Excelente progreso! Tu velocidad está mejorando consistentemente.</div>';
+    } else if (stats.change_percent > 0) {
+        html += '<div style="color:#3b82f6;font-size:13px;">📈 Progreso positivo. Sigue así para mantener la tendencia ascendente.</div>';
+    } else if (stats.change_percent < -5) {
+        html += '<div style="color:#f59e0b;font-size:13px;">⚠️ Considera revisar tu estrategia para recuperar el ritmo anterior.</div>';
+    } else {
+        html += '<div style="color:#94a3b8;font-size:13px;">📊 Rendimiento estable. Busca oportunidades de optimización.</div>';
+    }
+    html += '</div></div>';
+
+    // Last 7 days with enhanced context
+    if (records && records.speed_trend) {
+        html += '<div class="card"><div class="card-title">📊 Últimos 7 Días</div>';
+        const recent7 = records.speed_trend.slice(-7);
+        html += '<div class="stats-grid">';
+        recent7.forEach(day => {
+            const date = new Date(day.date);
+            const dayName = date.toLocaleDateString('es-CL', { weekday: 'short' });
+            const dateStr = date.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit' });
+            const dayBadge = getEfficiencyBadge(day.speed);
+            html += `<div class="stat"><div class="stat-label">${dayName}<br><span style="font-size:11px;color:#94a3b8">${dateStr}</span></div><div class="stat-value" style="color:${dayBadge.color}">${day.speed} ${dayBadge.emoji}</div></div>`;
+        });
+        html += '</div></div>';
+    }
+
+    // Enhanced total section
+    html += '<div class="card"><div class="card-title">🏆 Estadísticas Totales</div>';
+    
+    // Better calculations for meaningful insights
+    const avgEarningsPerOrder = allTime.total_orders > 0 ? Math.round(allTime.total_earned / allTime.total_orders) : 0;
+    const avgSkusPerOrder = allTime.total_orders > 0 ? Math.round(allTime.total_skus / allTime.total_orders) : 0;
+    const estimatedMonthlyEarnings = Math.round(allTime.total_earned / allTime.total_orders * 30); // Assuming ~30 orders per month
+    
+    html += '<div class="stats-grid">';
+    html += `<div class="stat"><div class="stat-label">Total Ganado</div><div class="stat-value highlight">$${formatLocalNumber(allTime.total_earned)}</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">📈 Ganancia acumulada total</div></div>`;
+    html += `<div class="stat"><div class="stat-label">Pedidos Completados</div><div class="stat-value">${allTime.total_orders}</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">💰 $${formatLocalNumber(avgEarningsPerOrder)} promedio por pedido</div></div>`;
+    html += `<div class="stat"><div class="stat-label">SKUs Procesados</div><div class="stat-value">${formatLocalNumber(allTime.total_skus)}</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">📦 ${avgSkusPerOrder} SKUs promedio por pedido</div></div>`;
+    html += `<div class="stat"><div class="stat-label">Velocidad Promedio</div><div class="stat-value">${allTime.avg_speed} SKUs/h</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">⚡ Rendimiento histórico general</div></div>`;
+    html += '</div>';
+    
+    // Add monthly projection insight
+    html += `<div style="background:rgba(59,130,246,0.1);padding:12px;border-radius:8px;margin-top:16px;text-align:center">
+        <div style="font-size:12px;color:#3b82f6;font-weight:600;margin-bottom:4px">💡 Proyección Mensual</div>
+        <div style="font-size:11px;color:#94a3b8">
+            Con tu promedio actual de $${formatLocalNumber(avgEarningsPerOrder)}/pedido, 
+            completando ~30 pedidos al mes podrías ganar aproximadamente 
+            <strong style="color:#3b82f6">$${formatLocalNumber(estimatedMonthlyEarnings)}</strong>
+        </div>
+        <div style="font-size:10px;color:#64748b;margin-top:8px;font-style:italic">
+            ℹ️ Los tiempos mostrados reflejan tiempo activo de picking, no incluyen tiempo de espera entre pedidos
+        </div>
+    </div>`;
+    
+    html += '</div>';
+    
+    html += '</div>';
+    return html;
+}
+
+let ordersData = null, currentOrdersView = 'recent';
+
+async function fetchOrdersData() {
+    if (ordersData) return ordersData;
+    try {
+        const [daily, monthly] = await Promise.all([
+            fetch('/api/orders/daily').then(r => r.json()),
+            fetch('/api/orders/monthly').then(r => r.json())
+        ]);
+        ordersData = { daily, monthly };
+        return ordersData;
+    } catch (e) {
+        console.error('Error loading orders data:', e);
+        return { daily: [], monthly: [] };
+    }
+}
+
+function showOrdersTab(tab) {
+    currentOrdersView = tab;
+    document.querySelectorAll('.tab-secondary').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+    renderDashboard(cachedData);
+}
+
+async function expandDayOrders(dateStr) {
+    if (!ordersData) ordersData = await fetchOrdersData();
+    const dayData = ordersData.daily.find(d => d.date === dateStr);
+    if (!dayData) return;
+    
+    const dayDiv = document.getElementById(`day-${dateStr}`);
+    if (dayDiv.classList.contains('expanded')) {
+        dayDiv.classList.remove('expanded');
+        // Remove existing expanded content
+        const expandedDiv = dayDiv.querySelector('.expanded-orders');
+        if (expandedDiv) expandedDiv.remove();
+        return;
+    }
+    
+    // Store original content before expanding
+    if (!dayDiv.dataset.originalContent) {
+        dayDiv.dataset.originalContent = dayDiv.innerHTML;
+    }
+    
+    let expandedHtml = `<div class="expanded-orders">`;
+    dayData.orders.forEach(order => {
+        const tipoColor = order.tipo === 'Bipicking' ? '#8b5cf6' : '#64748b';
+        expandedHtml += `<div class="order-detail">
+            <div class="order-cliente" style="display:flex;justify-content:space-between;align-items:center">
+                <span>${order.cliente}</span>
+                <div style="background:rgba(139,92,246,0.2);color:${tipoColor};padding:2px 6px;border-radius:8px;font-size:10px;font-weight:600">${order.tipo || 'Mono'}</div>
+            </div>
+            <div class="order-stats">
+                <span>🛒 ${order.skus} SKUs</span>
+                <span>⏱️ ${order.tiempo}</span>
+                <span>💰 $${formatLocalNumber(order.earnings)}</span>
+            </div>
+        </div>`;
+    });
+    expandedHtml += `</div>`;
+    
+    // Replace content with original + expanded
+    dayDiv.innerHTML = dayDiv.dataset.originalContent + expandedHtml;
+    dayDiv.classList.add('expanded');
+}
+
+function renderOrders(recent, records) {
+    let html = '<div class="section active">';
+    
+    html += '<div class="card"><div class="card-title">📋 Gestión de Pedidos</div>';
+    html += '<div class="tabs-secondary">';
+    html += '<div class="tab-secondary' + (currentOrdersView === 'recent' ? ' active' : '') + '" onclick="showOrdersTab(\'recent\')">🕒 Recientes</div>';
+    html += '<div class="tab-secondary' + (currentOrdersView === 'daily' ? ' active' : '') + '" onclick="showOrdersTab(\'daily\')">📅 Por Día</div>';
+    html += '<div class="tab-secondary' + (currentOrdersView === 'monthly' ? ' active' : '') + '" onclick="showOrdersTab(\'monthly\')">📊 Por Mes</div>';
+    html += '</div>';
+    
+    if (currentOrdersView === 'recent') {
+        // Enhanced recent orders with performance indicators
+        if (recent && recent.length > 0) {
+            // Summary for recent orders
+            const totalSkus = recent.reduce((sum, order) => sum + (order.skus || 0), 0);
+            const validSpeeds = recent.filter(order => order.speed && !isNaN(order.speed));
+            const avgSpeed = validSpeeds.length > 0 ? validSpeeds.reduce((sum, order) => sum + order.speed, 0) / validSpeeds.length : 0;
+            const totalEarnings = recent.reduce((sum, order) => sum + (order.earnings || 0), 0);
+            
+            html += `<div style="background:rgba(15,23,42,0.5);padding:16px;border-radius:12px;margin-bottom:16px">
+                <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;text-align:center">
+                    <div style="flex:1;min-width:70px">
+                        <div style="font-size:18px;font-weight:bold;color:#3b82f6">${recent.length}</div>
+                        <div style="font-size:11px;color:#94a3b8">Pedidos</div>
+                    </div>
+                    <div style="flex:1;min-width:70px">
+                        <div style="font-size:18px;font-weight:bold;color:#10b981">${totalSkus}</div>
+                        <div style="font-size:11px;color:#94a3b8">SKUs</div>
+                    </div>
+                    <div style="flex:1;min-width:70px">
+                        <div style="font-size:18px;font-weight:bold;color:#f59e0b">${avgSpeed.toFixed(1)}</div>
+                        <div style="font-size:11px;color:#94a3b8">Velocidad</div>
+                    </div>
+                    <div style="flex:1;min-width:70px">
+                        <div style="font-size:18px;font-weight:bold;color:#ef4444">$${formatLocalNumber(totalEarnings || 0)}</div>
+                        <div style="font-size:11px;color:#94a3b8">Ganancias</div>
+                    </div>
+                </div>
+            </div>`;
+            
+            html += '<div class="order-list-container">';
+            recent.forEach((o, index) => {
+                // Debug: log the order object to see what fields are available
+                if (index === 0) console.log('First order object:', o);
+                
+                const performance = o.speed >= 30 ? { icon: '🔥', text: 'Excelente', color: '#10b981' } : 
+                                  o.speed >= 25 ? { icon: '⚡', text: 'Muy Bueno', color: '#3b82f6' } : 
+                                  o.speed >= 20 ? { icon: '👍', text: 'Bueno', color: '#f59e0b' } : 
+                                  { icon: '📈', text: 'Mejorando', color: '#8b5cf6' };
+                
+                const timePerSku = (o.tiempo && o.skus > 0) ? (() => {
+                    let timeInMins = 0;
+                    if (typeof o.tiempo === 'string') {
+                        // Handle string format like "5.2 min" or "5.2"
+                        timeInMins = parseFloat(o.tiempo.replace(/[^0-9.]/g, ''));
+                    } else if (typeof o.tiempo === 'number') {
+                        timeInMins = o.tiempo;
+                    }
+                    return isNaN(timeInMins) || timeInMins === 0 ? 0 : (timeInMins / o.skus);
+                })() : 0;
+                
+                html += `<div class="order-item-card" style="position:relative;margin-bottom:12px">
+                    <div class="order-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                        <div class="order-cliente" style="flex-grow:1">${o.cliente}</div>
+                        <div style="display:flex;gap:8px;align-items:center">
+                            <div style="background:${performance.color}20;color:${performance.color};padding:4px 8px;border-radius:12px;font-size:10px;font-weight:600">
+                                ${performance.icon} ${performance.text}
+                            </div>
+                            ${o.tipo ? `<div style="background:rgba(139,92,246,0.2);color:#8b5cf6;padding:4px 8px;border-radius:12px;font-size:10px;font-weight:600">${o.tipo}</div>` : `<div style="background:rgba(100,116,139,0.2);color:#64748b;padding:4px 8px;border-radius:12px;font-size:10px;font-weight:600">Mono</div>`}
+                            <div class="order-speed-badge" style="background:rgba(59,130,246,0.2);color:#3b82f6;padding:4px 8px;border-radius:12px;font-size:11px;font-weight:600">${o.speed} SKUs/h</div>
+                        </div>
+                    </div>
+                    <div class="order-details" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">
+                        <div style="font-size:12px;color:#94a3b8">
+                            📅 ${o.fecha} • 🛒 ${o.skus} SKUs • ⏱️ ${o.tiempo}
+                        </div>
+                        <div style="font-size:12px;color:#94a3b8">
+                            💰 $${o.earnings ? formatLocalNumber(o.earnings) : '0'} • ⏱️ ${timePerSku > 0 ? timePerSku.toFixed(2) + ' min' : 'N/A'}/SKU
+                        </div>
+                    </div>
+                </div>`;
+            });
+            html += '</div>';
+        } else {
+            html += '<div style="text-align:center;padding:40px;color:#94a3b8">';
+            html += '<div style="font-size:48px;margin-bottom:16px">📋</div>';
+            html += '<div style="font-size:18px;font-weight:600;margin-bottom:8px">Sin pedidos recientes</div>';
+            html += '<div style="font-size:14px">Completa algunos pedidos para verlos aquí</div>';
+            html += '</div>';
+        }
+    } else if (currentOrdersView === 'daily') {
+        html += '<div id="dailyOrdersContainer"><div class="loading">Cargando pedidos por día...</div></div>';
+        // Load daily orders asynchronously
+        setTimeout(async () => {
+            const orders = await fetchOrdersData();
+            const container = document.getElementById('dailyOrdersContainer');
+            if (container) {
+                let dailyHtml = '';
+                orders.daily.slice(0, 14).forEach(day => {
+                    const efficiency = day.speed > 30 ? '🔥 Excelente' : 
+                                     day.speed > 25 ? '⚡ Muy Bueno' : 
+                                     day.speed > 20 ? '👍 Bueno' : '📈 Mejorando';
+                    const avgSkusPerOrder = day.orders_count > 0 ? (day.total_skus / day.orders_count).toFixed(1) : '0';
+                    const avgEarningsPerOrder = day.orders_count > 0 ? (day.total_earned / day.orders_count).toFixed(0) : '0';
+                    
+                    dailyHtml += `<div class="day-summary" id="day-${day.date}" onclick="expandDayOrders('${day.date}')" style="cursor:pointer">
+                        <div class="day-header">
+                            <div class="day-info">
+                                <div class="day-date">${day.date_formatted} (${day.weekday})</div>
+                                <div class="day-stats">${day.orders_count} pedidos • ${day.total_skus} SKUs • $${formatLocalNumber(day.total_earned)}</div>
+                                <div style="font-size:11px;color:#94a3b8;margin-top:4px">
+                                    📊 ${avgSkusPerOrder} SKUs/pedido • 💰 $${avgEarningsPerOrder}/pedido
+                                </div>
+                            </div>
+                            <div class="day-metrics">
+                                <div class="day-speed" style="text-align:center">
+                                    <div style="font-size:16px;font-weight:bold">${day.speed}</div>
+                                    <div style="font-size:10px;color:#94a3b8">${efficiency}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+                container.innerHTML = dailyHtml;
+            }
+        }, 100);
+    } else if (currentOrdersView === 'monthly') {
+        html += '<div id="monthlyOrdersContainer"><div class="loading">Cargando pedidos por mes...</div></div>';
+        // Load monthly orders asynchronously
+        setTimeout(async () => {
+            const orders = await fetchOrdersData();
+            const container = document.getElementById('monthlyOrdersContainer');
+            if (container) {
+                let monthlyHtml = '';
+                orders.monthly.forEach(month => {
+                    const avgOrdersPerDay = month.working_days > 0 ? (month.orders_count / month.working_days).toFixed(1) : '0';
+                    const avgSkusPerDay = month.working_days > 0 ? (month.total_skus / month.working_days).toFixed(0) : '0';
+                    const avgEarningsPerDay = month.working_days > 0 ? (month.total_earned / month.working_days).toFixed(0) : '0';
+                    const performance = month.speed >= 30 ? '🔥 Excelente' : 
+                                       month.speed >= 25 ? '⚡ Muy Bueno' : 
+                                       month.speed >= 20 ? '👍 Bueno' : '📈 Mejorando';
+                    
+                    monthlyHtml += `<div class="month-summary" style="margin-bottom:20px">
+                        <div class="month-header">
+                            <div class="month-title" style="font-size:18px;font-weight:bold;margin-bottom:8px">${month.month_formatted}</div>
+                            <div class="month-totals" style="margin-bottom:8px">
+                                📋 ${month.orders_count} pedidos • 🛒 ${month.total_skus} SKUs • 💰 $${formatLocalNumber(month.total_earned)}
+                            </div>
+                            <div class="month-metrics" style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px">
+                                <span style="background:rgba(59,130,246,0.1);padding:4px 8px;border-radius:6px;color:#3b82f6">⚡ ${month.speed} SKUs/h</span>
+                                <span style="background:rgba(16,185,129,0.1);padding:4px 8px;border-radius:6px;color:#10b981">📅 ${month.working_days} días</span>
+                                <span style="background:rgba(245,158,11,0.1);padding:4px 8px;border-radius:6px;color:#f59e0b">${performance}</span>
+                            </div>
+                            <div style="background:rgba(15,23,42,0.5);padding:12px;border-radius:8px;margin-bottom:12px">
+                                <div style="font-size:12px;font-weight:600;color:#cbd5e1;margin-bottom:6px">Promedios Diarios</div>
+                                <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:11px">
+                                    <span style="color:#3b82f6">📋 ${avgOrdersPerDay} pedidos/día</span>
+                                    <span style="color:#10b981">🛒 ${avgSkusPerDay} SKUs/día</span>
+                                    <span style="color:#ef4444">💰 $${avgEarningsPerDay}/día</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="daily-breakdown" style="display:flex;flex-wrap:wrap;gap:4px">`;
+                    month.daily_breakdown.forEach(day => {
+                        const dayPerformance = day.orders_count === 0 ? 'background:#374151' : 
+                                             day.orders_count >= 5 ? 'background:#10b981' : 
+                                             day.orders_count >= 3 ? 'background:#3b82f6' : 
+                                             day.orders_count >= 1 ? 'background:#f59e0b' : 'background:#6b7280';
+                        monthlyHtml += `<div class="mini-day" style="${dayPerformance};color:white;padding:6px;border-radius:4px;min-width:45px;text-align:center">
+                            <div class="mini-date" style="font-size:10px;font-weight:bold">${day.date_formatted}</div>
+                            <div class="mini-stats" style="font-size:9px">${day.orders_count || 0}</div>
+                        </div>`;
+                    });
+                    monthlyHtml += '</div></div>';
+                });
+                container.innerHTML = monthlyHtml;
+            }
+        }, 100);
+    }
+    
+    html += '</div>';
+    
+    html += '</div>';
+    return html;
+}
+
+function renderRecords(bests, records) {
+    let html = '<div class="section active">';
+    html += '<div class="card"><div class="card-title">🏆 Records Personales</div>';
+    
+    // Helper function to calculate days since record
+    const getDaysSince = (dateStr) => {
+        const recordDate = new Date(dateStr.split('/').reverse().join('-'));
+        const today = new Date();
+        const diffTime = Math.abs(today - recordDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+    };
+    
+    // Helper function to get record age text
+    const getRecordAge = (days) => {
+        if (days === 0) return 'Hoy';
+        if (days === 1) return 'Ayer';
+        if (days < 7) return `Hace ${days} días`;
+        if (days < 30) return `Hace ${Math.floor(days / 7)} semanas`;
+        if (days < 365) return `Hace ${Math.floor(days / 30)} meses`;
+        return `Hace ${Math.floor(days / 365)} años`;
+    };
+
+    // Fastest Order - enhanced with context
+    if (bests.fastest_order) {
+        const daysSince = getDaysSince(bests.fastest_order.fecha);
+        const efficiency = bests.fastest_order.speed >= 30 ? '🔥' : bests.fastest_order.speed >= 25 ? '⚡' : '👍';
+        html += `
+        <div class="best-item" style="border-left-color:#ef4444;position:relative">
+            <div style="position:absolute;top:12px;right:12px;background:rgba(239,68,68,0.1);color:#ef4444;padding:4px 8px;border-radius:12px;font-size:10px;font-weight:600">${getRecordAge(daysSince)}</div>
+            <div class="best-title">Más Rápido ⚡</div>
+            <div class="best-value">${bests.fastest_order.time} mins</div>
+            <div class="best-details">
+                🛒 ${bests.fastest_order.skus} SKUs • ${efficiency} ${bests.fastest_order.speed} SKUs/h<br>
+                💰 $${formatLocalNumber(bests.fastest_order.earnings)} • 📅 ${bests.fastest_order.fecha}<br>
+                👤 ${bests.fastest_order.cliente}<br>
+                <span style="color:#ef4444;font-weight:600">⏱️ ${(bests.fastest_order.time / bests.fastest_order.skus).toFixed(2)} min por SKU</span>
+            </div>
+        </div>`;
+    }
+    
+    // Most SKUs - enhanced with context
+    if (bests.most_skus) {
+        const daysSince = getDaysSince(bests.most_skus.fecha);
+        const efficiency = bests.most_skus.speed >= 30 ? '🔥' : bests.most_skus.speed >= 25 ? '⚡' : '👍';
+        const timePerSku = bests.most_skus.time / bests.most_skus.skus;
+        html += `
+        <div class="best-item" style="border-left-color:#f59e0b;position:relative">
+            <div style="position:absolute;top:12px;right:12px;background:rgba(245,158,11,0.1);color:#f59e0b;padding:4px 8px;border-radius:12px;font-size:10px;font-weight:600">${getRecordAge(daysSince)}</div>
+            <div class="best-title">Más SKUs 📦</div>
+            <div class="best-value">${bests.most_skus.skus} SKUs</div>
+            <div class="best-details">
+                ⏱️ ${bests.most_skus.time} mins • ${efficiency} ${bests.most_skus.speed} SKUs/h<br>
+                💰 $${formatLocalNumber(bests.most_skus.earnings)} • 📅 ${bests.most_skus.fecha}<br>
+                👤 ${bests.most_skus.cliente}<br>
+                <span style="color:#f59e0b;font-weight:600">📊 ${timePerSku.toFixed(1)} minutos por SKU</span>
+            </div>
+        </div>`;
+    }
+    
+    // Best Speed - enhanced with context
+    if (bests.best_speed) {
+        const daysSince = getDaysSince(bests.best_speed.fecha);
+        const speedCategory = bests.best_speed.speed >= 40 ? '🚀 Supersónico' : 
+                            bests.best_speed.speed >= 35 ? '🔥 Increíble' : 
+                            bests.best_speed.speed >= 30 ? '⚡ Excelente' : '👍 Muy bueno';
+        html += `
+        <div class="best-item" style="border-left-color:#10b981;position:relative">
+            <div style="position:absolute;top:12px;right:12px;background:rgba(16,185,129,0.1);color:#10b981;padding:4px 8px;border-radius:12px;font-size:10px;font-weight:600">${getRecordAge(daysSince)}</div>
+            <div class="best-title">Mejor Velocidad 🔥</div>
+            <div class="best-value">${bests.best_speed.speed} SKUs/h</div>
+            <div class="best-details">
+                🛒 ${bests.best_speed.skus} SKUs • ⏱️ ${bests.best_speed.time} mins<br>
+                💰 $${formatLocalNumber(bests.best_speed.earnings)} • 📅 ${bests.best_speed.fecha}<br>
+                👤 ${bests.best_speed.cliente}<br>
+                <span style="color:#10b981;font-weight:600">${speedCategory}</span>
+            </div>
+        </div>`;
+    }
+    
+    // Add motivational section if no records exist
+    if (!bests.fastest_order && !bests.most_skus && !bests.best_speed) {
+        html += '<div style="text-align:center;padding:40px;color:#94a3b8">';
+        html += '<div style="font-size:48px;margin-bottom:16px">🎯</div>';
+        html += '<div style="font-size:18px;font-weight:600;margin-bottom:8px">¡Establece tus primeros records!</div>';
+        html += '<div style="font-size:14px">Completa más pedidos para ver tus mejores marcas aquí.</div>';
+        html += '</div>';
+    }
+    
+    // Add record comparison section
+    if (bests.fastest_order || bests.most_skus || bests.best_speed) {
+        html += '<div style="background:rgba(15,23,42,0.5);padding:16px;border-radius:12px;margin-top:16px">';
+        html += '<div style="text-align:center;color:#cbd5e1;font-weight:600;margin-bottom:12px">🎯 Objetivos de Mejora</div>';
+        
+        const suggestions = [];
+        if (bests.fastest_order && bests.fastest_order.time > 20) {
+            suggestions.push('⚡ Intenta reducir el tiempo más rápido a menos de 20 minutos');
+        }
+        if (bests.most_skus && bests.most_skus.skus < 50) {
+            suggestions.push('📦 Desafíate a completar un pedido de 50+ SKUs');
+        }
+        if (bests.best_speed && bests.best_speed.speed < 40) {
+            suggestions.push('🔥 Apunta a superar 40 SKUs/hora de velocidad');
+        }
+        
+        if (suggestions.length === 0) {
+            suggestions.push('🏆 ¡Records impresionantes! Mantén este nivel de excelencia');
+        }
+        
+        suggestions.forEach(suggestion => {
+            html += `<div style="color:#94a3b8;font-size:13px;margin:4px 0;padding:4px 0">${suggestion}</div>`;
+        });
+        html += '</div>';
+    }
+    
+    html += '</div>';
+    html += '</div>';
+    return html;
+}
+
+function renderAnalytics(records) {
+    let html = '<div class="section active">';
+    
+    // Helper function for time formatting
+    const formatTime = (minutes) => {
+        const hours = Math.floor(minutes / 60);
+        const mins = Math.floor(minutes % 60);
+        return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+    };
+    
+    // Helper function for performance categorization
+    const getPerformanceCategory = (speed) => {
+        if (speed >= 35) return { icon: '🚀', text: 'Supersónico', color: '#10b981', bg: 'rgba(16,185,129,0.1)' };
+        if (speed >= 30) return { icon: '🔥', text: 'Excelente', color: '#10b981', bg: 'rgba(16,185,129,0.1)' };
+        if (speed >= 25) return { icon: '⚡', text: 'Muy Bueno', color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' };
+        if (speed >= 20) return { icon: '👍', text: 'Bueno', color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' };
+        if (speed >= 15) return { icon: '📈', text: 'Mejorando', color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)' };
+        return { icon: '🎯', text: 'En Desarrollo', color: '#64748b', bg: 'rgba(100,116,139,0.1)' };
+    };
+    
+    // Performance analysis by SKU range with enhanced details
+    html += '<div class="card"><div class="card-title">📊 Análisis de Rendimiento por SKUs</div>';
+    html += '<div style="background:rgba(15,23,42,0.5);padding:12px;border-radius:8px;margin-bottom:16px;font-size:12px;color:#94a3b8">';
+    html += '💡 <strong>Insight:</strong> Los pedidos más grandes tienden a ser más eficientes debido al menor tiempo de setup por SKU.';
+    html += '</div>';
+    
+    Object.entries(records.speed_by_range || {}).forEach(([range, data]) => {
+        const category = getPerformanceCategory(data.avg_speed);
+        const efficiency = (data.avg_speed / 30 * 100).toFixed(0); // Efficiency percentage based on 30 SKUs/h target
+        const timePerSku = data.avg_time / (parseFloat(range.split('-')[0]) || 1); // minutes per SKU
+        
+        html += `<div class="best-item" style="border-left-color:${category.color};background:${category.bg}">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <div class="best-title">${range} SKUs</div>
+                <div style="background:${category.color};color:white;padding:4px 8px;border-radius:12px;font-size:10px;font-weight:600">
+                    ${category.icon} ${category.text}
+                </div>
+            </div>
+            <div class="best-value">${data.avg_speed} SKUs/h</div>
+            <div class="best-details">
+                📋 ${data.orders} pedidos completados • ⏱️ ${formatTime(data.avg_time)} promedio<br>
+                🔥 Máximo: ${data.max_speed} SKUs/h • 📊 Eficiencia: ${efficiency}%<br>
+                ⚡ ${timePerSku.toFixed(2)} min por SKU • ${data.orders > 10 ? '📈 Estadística confiable' : '⚠️ Muestra pequeña'}
+            </div>
+        </div>`;
+    });
+    html += '</div>';
+    
+    // Enhanced weekly comparison with trends
+    html += '<div class="card"><div class="card-title">📈 Comparación Semanal</div>';
+    html += '<div style="background:rgba(15,23,42,0.5);padding:12px;border-radius:8px;margin-bottom:16px;font-size:12px;color:#94a3b8">';
+    html += '📊 <strong>Análisis:</strong> Compara tu rendimiento semanal para identificar patrones y tendencias de mejora.';
+    html += '</div>';
+    
+    const weeklyData = records.weekly_comparison || [];
+    weeklyData.forEach((week, index) => {
+        const category = getPerformanceCategory(week.avg_speed);
+        const prevWeek = weeklyData[index + 1];
+        const trend = prevWeek ? 
+            (week.avg_speed > prevWeek.avg_speed ? '📈 +' + (week.avg_speed - prevWeek.avg_speed).toFixed(1) : 
+             week.avg_speed < prevWeek.avg_speed ? '📉 ' + (week.avg_speed - prevWeek.avg_speed).toFixed(1) : '➡️ Sin cambio') : '';
+        
+        const workDays = Math.ceil(week.orders / (week.orders / 7)); // Estimate work days
+        const avgOrdersPerDay = week.orders / workDays;
+        const totalHours = week.total_time / 60;
+        const avgHoursPerDay = totalHours / workDays;
+        
+        html += `<div class="best-item" style="border-left-color:${category.color}">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <div class="best-title">${week.week}</div>
+                <div style="display:flex;gap:8px;align-items:center">
+                    ${trend && `<span style="font-size:11px;color:${week.avg_speed > (prevWeek?.avg_speed || 0) ? '#10b981' : '#ef4444'}">${trend}</span>`}
+                    <span style="background:${category.color};color:white;padding:2px 6px;border-radius:8px;font-size:10px">${category.icon}</span>
+                </div>
+            </div>
+            <div class="best-value">${week.avg_speed} SKUs/h</div>
+            <div class="best-details">
+                📋 ${week.orders} pedidos • 🛒 ${week.total_skus} SKUs • ⏱️ ${formatTime(week.total_time)}<br>
+                📅 ~${workDays} días trabajados • 📊 ${avgOrdersPerDay.toFixed(1)} pedidos/día<br>
+                💪 ${avgHoursPerDay.toFixed(1)} horas de picking/día • ${category.text}
+            </div>
+        </div>`;
+    });
+    html += '</div>';
+    
+    // Enhanced speed trend chart with insights
+    if (records.speed_trend && records.speed_trend.length > 0) {
+        html += '<div class="card"><div class="card-title">📈 Tendencia de Velocidad (Últimos 14 Días)</div>';
+        
+        const trendData = records.speed_trend.slice(-14);
+        const avgSpeed = trendData.reduce((sum, day) => sum + day.speed, 0) / trendData.length;
+        const maxSpeed = Math.max(...trendData.map(d => d.speed));
+        const minSpeed = Math.min(...trendData.map(d => d.speed));
+        const improvementTrend = trendData.length > 7 ? 
+            (trendData.slice(-7).reduce((sum, d) => sum + d.speed, 0) / 7) - 
+            (trendData.slice(0, 7).reduce((sum, d) => sum + d.speed, 0) / 7) : 0;
+        
+        html += `<div style="background:rgba(15,23,42,0.5);padding:12px;border-radius:8px;margin-bottom:16px">
+            <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;text-align:center">
+                <div style="flex:1;min-width:70px">
+                    <div style="font-size:16px;font-weight:bold;color:#3b82f6">${avgSpeed.toFixed(1)}</div>
+                    <div style="font-size:11px;color:#94a3b8">Promedio</div>
+                </div>
+                <div style="flex:1;min-width:70px">
+                    <div style="font-size:16px;font-weight:bold;color:#10b981">${maxSpeed}</div>
+                    <div style="font-size:11px;color:#94a3b8">Máximo</div>
+                </div>
+                <div style="flex:1;min-width:70px">
+                    <div style="font-size:16px;font-weight:bold;color:#f59e0b">${minSpeed}</div>
+                    <div style="font-size:11px;color:#94a3b8">Mínimo</div>
+                </div>
+                <div style="flex:1;min-width:70px">
+                    <div style="font-size:16px;font-weight:bold;color:${improvementTrend > 0 ? '#10b981' : improvementTrend < 0 ? '#ef4444' : '#94a3b8'}">
+                        ${improvementTrend > 0 ? '+' : ''}${improvementTrend.toFixed(1)}
+                    </div>
+                    <div style="font-size:11px;color:#94a3b8">Tendencia</div>
+                </div>
+            </div>
+        </div>`;
+        
+        html += '<div class="stats-grid">';
+        trendData.forEach(day => {
+            const date = new Date(day.date);
+            const dayName = date.toLocaleDateString('es-CL', { weekday: 'short' });
+            const dateStr = date.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit' });
+            const category = getPerformanceCategory(day.speed);
+            const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+            
+            html += `<div class="stat" style="position:relative;${isWeekend ? 'background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3)' : ''}">
+                ${isWeekend ? '<div style="position:absolute;top:4px;right:4px;font-size:10px">🏖️</div>' : ''}
+                <div class="stat-label">
+                    ${dayName}<br>
+                    <span style="font-size:11px;color:#94a3b8">${dateStr}</span>
+                </div>
+                <div class="stat-value">
+                    <div style="font-size:16px;font-weight:bold">${day.speed}</div>
+                    <div style="font-size:10px;color:${category.color}">${category.icon}</div>
+                </div>
+            </div>`;
+        });
+        html += '</div></div>';
+    }
+    
+    // Enhanced top fastest orders
+    html += '<div class="card"><div class="card-title">⚡ Top 10 Pedidos Más Rápidos</div>';
+    html += '<div style="background:rgba(15,23,42,0.5);padding:12px;border-radius:8px;margin-bottom:16px;font-size:12px;color:#94a3b8">';
+    html += '🏆 <strong>Records de velocidad:</strong> Estos son tus pedidos completados en menor tiempo. Analiza qué los hizo especiales.';
+    html += '</div>';
+    
+    (records.top_fast_orders || []).slice(0, 10).forEach((order, i) => {
+        const category = getPerformanceCategory(order.speed);
+        const timePerSku = (order.Tiempo_mins / order.SKUs).toFixed(2);
+        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`;
+        
+        html += `<div class="best-item" style="background:${i < 3 ? 'rgba(255,215,0,0.05)' : 'transparent'}">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+                <div class="best-title" style="display:flex;align-items:center;gap:8px">
+                    <span style="font-size:16px">${medal}</span>
+                    <span>${order.Tiempo_mins} mins</span>
+                </div>
+                <div style="background:${category.color};color:white;padding:2px 6px;border-radius:8px;font-size:10px">
+                    ${category.icon} ${category.text}
+                </div>
+            </div>
+            <div class="best-details">
+                🛒 ${order.SKUs} SKUs • ⚡ ${order.speed} SKUs/h • ⏱️ ${timePerSku} min/SKU<br>
+                👤 ${order.Cliente} • 📅 ${order.Fecha || 'N/A'}<br>
+                ${order.SKUs >= 20 ? '🏆 Pedido grande completado rápidamente' : '⚡ Eficiencia en pedido pequeño'}
+            </div>
+        </div>`;
+    });
+    html += '</div>';
+    
+    // Enhanced top speed orders
+    html += '<div class="card"><div class="card-title">🔥 Top 10 Mejor Velocidad (10+ SKUs)</div>';
+    html += '<div style="background:rgba(15,23,42,0.5);padding:12px;border-radius:8px;margin-bottom:16px;font-size:12px;color:#94a3b8">';
+    html += '🚀 <strong>Velocidad sostenida:</strong> Pedidos con 10+ SKUs donde mantuviste la mejor velocidad. ¡Excelente eficiencia!';
+    html += '</div>';
+    
+    (records.top_speed_orders || []).slice(0, 10).forEach((order, i) => {
+        const category = getPerformanceCategory(order.speed);
+        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`;
+        const efficiency = (order.speed / 40 * 100).toFixed(0); // Efficiency vs 40 SKUs/h gold standard
+        
+        html += `<div class="best-item" style="background:${i < 3 ? 'rgba(16,185,129,0.05)' : 'transparent'}">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+                <div class="best-title" style="display:flex;align-items:center;gap:8px">
+                    <span style="font-size:16px">${medal}</span>
+                    <span>${order.speed} SKUs/h</span>
+                </div>
+                <div style="background:${category.color};color:white;padding:2px 6px;border-radius:8px;font-size:10px">
+                    📊 ${efficiency}%
+                </div>
+            </div>
+            <div class="best-details">
+                🛒 ${order.SKUs} SKUs • ⏱️ ${order.Tiempo_mins} mins<br>
+                👤 ${order.Cliente} • 📅 ${order.Fecha || 'N/A'}<br>
+                ${order.speed >= 40 ? '🚀 Velocidad excepcional - ¡Nivel experto!' : 
+                  order.speed >= 35 ? '🔥 Velocidad excelente - ¡Muy eficiente!' : 
+                  '⚡ Gran velocidad sostenida'}
+            </div>
+        </div>`;
+    });
+    html += '</div>';
+    
+    html += '</div>';
+    return html;
+}
+
+let enhancedProductData = null, expandedBrands = new Set(), expandedLocations = new Set();
+
+async function fetchEnhancedProducts() {
+    if (enhancedProductData) return enhancedProductData;
+    try {
+        const [byBrand, byLocation, byCategory] = await Promise.all([
+            fetch('/api/products/enhanced/by-brand').then(r => r.json()),
+            fetch('/api/products/enhanced/by-location').then(r => r.json()),
+            fetch('/api/products/enhanced/by-category').then(r => r.json())
+        ]);
+        enhancedProductData = { byBrand, byLocation, byCategory };
+        return enhancedProductData;
+    } catch (e) {
+        console.error('Error loading enhanced products:', e);
+        return { byBrand: [], byLocation: [], byCategory: [] };
+    }
+}
+
+function toggleBrandExpansion(brand) {
+    if (expandedBrands.has(brand)) {
+        expandedBrands.delete(brand);
+    } else {
+        expandedBrands.add(brand);
+    }
+    renderDashboard(cachedData);
+}
+
+function toggleLocationExpansion(location) {
+    if (expandedLocations.has(location)) {
+        expandedLocations.delete(location);
+    } else {
+        expandedLocations.add(location);
+    }
+    renderDashboard(cachedData);
+}
+
+function renderProducts(data) {
+    let html = '<div class="section active">';
+    html += '<div class="card"><div class="card-title">🔍 Base de Datos de Productos</div>';
+    
+    // Enhanced summary with insights
+    html += `<div style="background:rgba(15,23,42,0.5);padding:16px;border-radius:12px;margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;text-align:center">
+            <div style="flex:1;min-width:80px">
+                <div style="font-size:20px;font-weight:bold;color:#3b82f6">${data.summary.total_products}</div>
+                <div style="font-size:11px;color:#94a3b8">Productos</div>
+            </div>
+            <div style="flex:1;min-width:80px">
+                <div style="font-size:20px;font-weight:bold;color:#10b981">${data.summary.total_brands}</div>
+                <div style="font-size:11px;color:#94a3b8">Marcas</div>
+            </div>
+            <div style="flex:1;min-width:80px">
+                <div style="font-size:20px;font-weight:bold;color:#f59e0b">${data.summary.total_locations}</div>
+                <div style="font-size:11px;color:#94a3b8">Ubicaciones</div>
+            </div>
+            <div style="flex:1;min-width:80px">
+                <div style="font-size:20px;font-weight:bold;color:#ef4444">~${Math.round(data.summary.total_products / data.summary.total_locations)}</div>
+                <div style="font-size:11px;color:#94a3b8">Productos/Zona</div>
+            </div>
+        </div>
+        <div style="margin-top:12px;text-align:center;color:#94a3b8;font-size:12px">
+            💡 <strong>Insight:</strong> Base de datos completa para optimizar el picking y conocer la ubicación de cada producto
+        </div>
+    </div>`;
+    
+    html += '<div class="tabs-secondary">';
+    html += '<div class="tab-secondary' + (currentProductTab === 'browse' ? ' active' : '') + '" onclick="showProductTab(\'browse\')">📂 Ver Todos</div>';
+    html += '<div class="tab-secondary' + (currentProductTab === 'search' ? ' active' : '') + '" onclick="showProductTab(\'search\')">🔍 Buscar</div>';
+    html += '<div class="tab-secondary' + (currentProductTab === 'brands' ? ' active' : '') + '" onclick="showProductTab(\'brands\')">🏷️ Por Marca</div>';
+    html += '<div class="tab-secondary' + (currentProductTab === 'locations' ? ' active' : '') + '" onclick="showProductTab(\'locations\')">📍 Por Ubicación</div>';
+    html += '<div class="tab-secondary' + (currentProductTab === 'categories' ? ' active' : '') + '" onclick="showProductTab(\'categories\')">📦 Por Categoría</div>';
+    html += '</div>';
+    
+    if (currentProductTab === 'browse') {
+        html += '<div style="background:rgba(15,23,42,0.5);padding:12px;border-radius:8px;margin-bottom:12px;font-size:12px;color:#94a3b8">';
+        html += '📊 <strong>Explorar:</strong> Navega por todos los productos ordenados por diferentes criterios. Ideal para familiarizarse con el inventario.';
+        html += '</div>';
+        
+        html += '<div class="tabs-secondary" style="margin-bottom:8px">';
+        html += '<div class="tab-secondary' + (currentBrowseSort === 'name' ? ' active' : '') + '" onclick="setBrowseSort(\'name\')">📝 Nombre</div>';
+        html += '<div class="tab-secondary' + (currentBrowseSort === 'brand' ? ' active' : '') + '" onclick="setBrowseSort(\'brand\')">🏷️ Marca</div>';
+        html += '<div class="tab-secondary' + (currentBrowseSort === 'frequency' ? ' active' : '') + '" onclick="setBrowseSort(\'frequency\')">📊 Popular</div>';
+        html += '<div class="tab-secondary' + (currentBrowseSort === 'price' ? ' active' : '') + '" onclick="setBrowseSort(\'price\')">💰 Precio</div>';
+        html += '</div>';
+        
+        // Add sorting explanation
+        const sortExplanation = {
+            'name': '🔤 Productos ordenados alfabéticamente por nombre',
+            'brand': '🏷️ Productos agrupados y ordenados por marca',
+            'frequency': '📊 Productos más solicitados primero - útil para optimizar picking',
+            'price': '💰 Productos ordenados por precio - identifica artículos costosos'
+        };
+        
+        html += `<div style="background:rgba(59,130,246,0.1);padding:8px;border-radius:6px;margin-bottom:12px;font-size:11px;color:#94a3b8;text-align:center">
+            ${sortExplanation[currentBrowseSort] || '📋 Explora todos los productos'}
+        </div>`;
+        
+        html += '<div id="browseResults"><div style="text-align:center;color:#94a3b8;padding:20px">Cargando productos...</div></div>';
+    } else if (currentProductTab === 'search') {
+        html += '<div style="background:rgba(15,23,42,0.5);padding:12px;border-radius:8px;margin-bottom:12px;font-size:12px;color:#94a3b8">';
+        html += '🔍 <strong>Búsqueda inteligente:</strong> Encuentra productos por nombre, marca, categoría o palabras clave. Ideal para localizar rápidamente productos específicos.';
+        html += '</div>';
+        
+        html += '<input type="text" class="search-box" placeholder="Buscar productos, marcas, categorías... (ej: leche, coca cola, limpieza)" onkeyup="handleProductSearch(event)" style="position:relative">';
+        
+        // Add search tips
+        html += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0;font-size:11px">';
+        html += '<span style="background:rgba(59,130,246,0.1);color:#3b82f6;padding:2px 6px;border-radius:4px">💡 Tip: Escribe al menos 2 caracteres</span>';
+        html += '<span style="background:rgba(16,185,129,0.1);color:#10b981;padding:2px 6px;border-radius:4px">🎯 Busca por marca, nombre o categoría</span>';
+        html += '<span style="background:rgba(245,158,11,0.1);color:#f59e0b;padding:2px 6px;border-radius:4px">⚡ Resultados instantáneos</span>';
+        html += '</div>';
+        
+        html += '<div id="searchResults"><div style="text-align:center;color:#94a3b8;padding:20px">Escribe para buscar productos...</div></div>';
+    } else if (currentProductTab === 'brands') {
+        html += '<div style="background:rgba(15,23,42,0.5);padding:12px;border-radius:8px;margin-bottom:12px;font-size:12px;color:#94a3b8">';
+        html += '🏷️ <strong>Por Marca:</strong> Explora productos organizados por marca. Haz clic en cada marca para ver todos sus productos y ubicaciones.';
+        html += '</div>';
+        
+        html += '<div id="brandsContainer"><div class="loading">Cargando marcas...</div></div>';
+        // Load brands asynchronously with enhancements
+        setTimeout(async () => {
+            const enhanced = await fetchEnhancedProducts();
+            const container = document.getElementById('brandsContainer');
+            if (container) {
+                let brandsHtml = '';
+                
+                // Add brands summary
+                brandsHtml += `<div style="background:rgba(16,185,129,0.1);padding:12px;border-radius:8px;margin-bottom:16px">
+                    <div style="text-align:center;color:#10b981;font-weight:600;margin-bottom:6px">📊 Resumen de Marcas</div>
+                    <div style="display:flex;justify-content:space-between;font-size:12px;color:#94a3b8">
+                        <span>🏷️ ${enhanced.byBrand.length} marcas activas</span>
+                        <span>📦 Promedio: ${Math.round(enhanced.byBrand.reduce((sum, b) => sum + b.product_count, 0) / enhanced.byBrand.length)} productos/marca</span>
+                    </div>
+                </div>`;
+                
+                enhanced.byBrand.slice(0, 25).forEach((brand, index) => {
+                    const isExpanded = expandedBrands.has(brand.brand);
+                    const icon = isExpanded ? '🔽' : '▶️';
+                    const popularityLevel = brand.total_frequency >= 100 ? '🔥 Muy Popular' : 
+                                          brand.total_frequency >= 50 ? '⚡ Popular' : 
+                                          brand.total_frequency >= 20 ? '👍 Moderada' : '📊 Ocasional';
+                    const popularityColor = brand.total_frequency >= 100 ? '#10b981' : 
+                                          brand.total_frequency >= 50 ? '#3b82f6' : 
+                                          brand.total_frequency >= 20 ? '#f59e0b' : '#94a3b8';
+                    
+                    brandsHtml += `<div class="expandable-section" style="position:relative">
+                        <div style="position:absolute;top:8px;right:8px;background:${popularityColor}20;color:${popularityColor};padding:2px 6px;border-radius:8px;font-size:10px;font-weight:600">
+                            ${popularityLevel}
+                        </div>
+                        <div class="section-header" onclick="toggleBrandExpansion('${brand.brand}')" style="cursor:pointer;padding-right:100px">
+                            <div class="section-info">
+                                <span class="expand-icon" style="font-size:16px;margin-right:8px">${icon}</span>
+                                <div class="section-details">
+                                    <div class="section-title" style="font-weight:bold;margin-bottom:4px">${brand.brand}</div>
+                                    <div class="section-stats" style="margin-bottom:4px">${brand.product_count} productos • ${brand.total_frequency} picks • ${brand.locations_count} ubicaciones</div>
+                                    <div class="section-price" style="color:#10b981">Rango: $${formatLocalNumber(brand.price_range.min)} - $${formatLocalNumber(brand.price_range.max)}</div>
+                                </div>
+                            </div>
+                        </div>`;
+                    
+                    if (isExpanded) {
+                        brandsHtml += '<div class="expanded-content" style="background:rgba(15,23,42,0.3);margin-top:8px;padding:12px;border-radius:8px">';
+                        brandsHtml += `<div style="margin-bottom:8px;font-size:12px;color:#cbd5e1;font-weight:600">Top ${Math.min(10, brand.products.length)} productos:</div>`;
+                        
+                        brand.products.slice(0, 10).forEach((product, prodIndex) => {
+                            const frequency = product.frequency >= 20 ? '🔥' : product.frequency >= 10 ? '⚡' : product.frequency >= 5 ? '👍' : '📊';
+                            brandsHtml += `<div class="product-item-mini" style="margin-bottom:8px;padding:8px;background:rgba(255,255,255,0.05);border-radius:6px">
+                                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                                    <div class="product-name" style="font-weight:600;font-size:13px">${product.name}</div>
+                                    <span style="background:${frequency === '🔥' ? '#10b981' : frequency === '⚡' ? '#3b82f6' : frequency === '👍' ? '#f59e0b' : '#94a3b8'}20;color:${frequency === '🔥' ? '#10b981' : frequency === '⚡' ? '#3b82f6' : frequency === '👍' ? '#f59e0b' : '#94a3b8'};padding:1px 4px;border-radius:4px;font-size:10px">${frequency}</span>
+                                </div>
+                                <div class="product-details" style="font-size:11px;color:#94a3b8;margin-bottom:4px">📊 ${product.frequency} picks • 💰 $${product.avg_price}</div>
+                                ${product.locations[0] ? `<div class="product-location" style="background:rgba(245,158,11,0.1);color:#f59e0b;padding:2px 6px;border-radius:4px;font-size:10px;display:inline-block">📍 ${product.locations[0]}</div>` : ''}
+                            </div>`;
+                        });
+                        if (brand.products.length > 10) {
+                            brandsHtml += `<div class="more-items" style="text-align:center;color:#64748b;font-size:12px;font-style:italic;margin-top:8px">... y ${brand.products.length - 10} productos más</div>`;
+                        }
+                        brandsHtml += '</div>';
+                    }
+                    brandsHtml += '</div>';
+                });
+                container.innerHTML = brandsHtml;
+            }
+        }, 100);
+    } else if (currentProductTab === 'locations') {
+        html += '<div style="background:rgba(15,23,42,0.5);padding:12px;border-radius:8px;margin-bottom:12px;font-size:12px;color:#94a3b8">';
+        html += '📍 <strong>Por Ubicación:</strong> Explora productos organizados por su ubicación en el darkstore. Perfecto para optimizar rutas de picking.';
+        html += '</div>';
+        
+        html += '<div id="locationsContainer"><div class="loading">Cargando ubicaciones...</div></div>';
+        // Load locations asynchronously with enhancements
+        setTimeout(async () => {
+            const enhanced = await fetchEnhancedProducts();
+            const container = document.getElementById('locationsContainer');
+            if (container) {
+                let locationsHtml = '';
+                
+                // Add locations summary and tips
+                locationsHtml += `<div style="background:rgba(245,158,11,0.1);padding:12px;border-radius:8px;margin-bottom:16px">
+                    <div style="text-align:center;color:#f59e0b;font-weight:600;margin-bottom:6px">🗺️ Guía de Ubicaciones</div>
+                    <div style="display:flex;justify-content:space-between;font-size:12px;color:#94a3b8;margin-bottom:6px">
+                        <span>📍 ${enhanced.byLocation.length} zonas mapeadas</span>
+                        <span>📦 Promedio: ${Math.round(enhanced.byLocation.reduce((sum, l) => sum + l.product_count, 0) / enhanced.byLocation.length)} productos/zona</span>
+                    </div>
+                    <div style="font-size:11px;color:#94a3b8;text-align:center">💡 Haz clic en cada zona para ver todos los productos disponibles</div>
+                </div>`;
+                
+                enhanced.byLocation.slice(0, 30).forEach(location => {
+                    const isExpanded = expandedLocations.has(location.location);
+                    const icon = isExpanded ? '🔽' : '▶️';
+                    const density = location.product_count >= 50 ? { text: '🔥 Alta Densidad', color: '#ef4444' } : 
+                                   location.product_count >= 20 ? { text: '⚡ Media Densidad', color: '#f59e0b' } : 
+                                   { text: '📊 Baja Densidad', color: '#10b981' };
+                    
+                    // Determine zone type based on location name
+                    const zoneType = location.location.toLowerCase().includes('fridge') || location.location.toLowerCase().includes('refriger') ? '❄️ Refrigerados' :
+                                   location.location.toLowerCase().includes('freeze') || location.location.toLowerCase().includes('congel') ? '🧊 Congelados' :
+                                   location.location.toLowerCase().includes('produce') || location.location.toLowerCase().includes('fruta') ? '🍎 Frescos' :
+                                   location.location.toLowerCase().includes('dry') || location.location.toLowerCase().includes('abarrot') ? '📦 Secos' :
+                                   '🏪 General';
+                    
+                    locationsHtml += `<div class="expandable-section" style="position:relative">
+                        <div style="position:absolute;top:8px;right:8px;background:${density.color}20;color:${density.color};padding:2px 6px;border-radius:8px;font-size:10px;font-weight:600">
+                            ${density.text}
+                        </div>
+                        <div class="section-header" onclick="toggleLocationExpansion('${location.location}')" style="cursor:pointer;padding-right:120px">
+                            <div class="section-info">
+                                <span class="expand-icon" style="font-size:16px;margin-right:8px">${icon}</span>
+                                <div class="section-details">
+                                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                                        <div class="section-title" style="font-weight:bold">${location.location}</div>
+                                        <span style="background:rgba(59,130,246,0.1);color:#3b82f6;padding:2px 6px;border-radius:4px;font-size:10px">${zoneType}</span>
+                                    </div>
+                                    <div class="section-stats" style="margin-bottom:4px">${location.product_count} productos • ${location.brands_count} marcas • ${location.total_frequency} picks</div>
+                                    <div class="section-brands" style="color:#10b981;font-size:11px">Principales: ${location.brands.slice(0, 3).join(', ')}${location.brands.length > 3 ? ` +${location.brands.length - 3} más` : ''}</div>
+                                </div>
+                            </div>
+                        </div>`;
+                    
+                    if (isExpanded) {
+                        locationsHtml += '<div class="expanded-content" style="background:rgba(15,23,42,0.3);margin-top:8px;padding:12px;border-radius:8px">';
+                        locationsHtml += `<div style="margin-bottom:8px;font-size:12px;color:#cbd5e1;font-weight:600">Top ${Math.min(10, location.products.length)} productos más solicitados:</div>`;
+                        
+                        location.products.slice(0, 10).forEach(product => {
+                            const frequency = product.frequency >= 20 ? '🔥' : product.frequency >= 10 ? '⚡' : product.frequency >= 5 ? '👍' : '📊';
+                            locationsHtml += `<div class="product-item-mini" style="margin-bottom:8px;padding:8px;background:rgba(255,255,255,0.05);border-radius:6px">
+                                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                                    <div class="product-brand" style="color:#3b82f6;font-weight:600;font-size:12px">${product.brand}</div>
+                                    <span style="background:${frequency === '🔥' ? '#10b981' : frequency === '⚡' ? '#3b82f6' : frequency === '👍' ? '#f59e0b' : '#94a3b8'}20;color:${frequency === '🔥' ? '#10b981' : frequency === '⚡' ? '#3b82f6' : frequency === '👍' ? '#f59e0b' : '#94a3b8'};padding:1px 4px;border-radius:4px;font-size:10px">${frequency}</span>
+                                </div>
+                                <div class="product-name" style="font-size:13px;margin-bottom:4px">${product.name}</div>
+                                <div class="product-details" style="font-size:11px;color:#94a3b8">📊 ${product.frequency} picks • 💰 $${product.avg_price}</div>
+                            </div>`;
+                        });
+                        if (location.products.length > 10) {
+                            locationsHtml += `<div class="more-items" style="text-align:center;color:#64748b;font-size:12px;font-style:italic;margin-top:8px">... y ${location.products.length - 10} productos más en esta zona</div>`;
+                        }
+                        locationsHtml += '</div>';
+                    }
+                    locationsHtml += '</div>';
+                });
+                container.innerHTML = locationsHtml;
+            }
+        }, 100);
+    } else if (currentProductTab === 'categories') {
+        html += '<div style="background:rgba(15,23,42,0.5);padding:12px;border-radius:8px;margin-bottom:12px;font-size:12px;color:#94a3b8">';
+        html += '📦 <strong>Por Categoría:</strong> Productos organizados por tipo/categoría. Útil para entender la distribución del inventario.';
+        html += '</div>';
+        
+        html += '<div id="categoriesContainer"><div class="loading">Cargando categorías...</div></div>';
+        // Load categories asynchronously with enhancements
+        setTimeout(async () => {
+            const enhanced = await fetchEnhancedProducts();
+            const container = document.getElementById('categoriesContainer');
+            if (container) {
+                let categoriesHtml = '';
+                
+                // Add categories summary
+                categoriesHtml += `<div style="background:rgba(139,92,246,0.1);padding:12px;border-radius:8px;margin-bottom:16px">
+                    <div style="text-align:center;color:#8b5cf6;font-weight:600;margin-bottom:6px">📋 Resumen de Categorías</div>
+                    <div style="font-size:12px;color:#94a3b8;text-align:center">
+                        ${enhanced.byCategory.length} categorías diferentes organizadas para fácil navegación
+                    </div>
+                </div>`;
+                
+                enhanced.byCategory.forEach((category, index) => {
+                    const categoryIcon = {
+                        'Despensa': '🥫', 'Granos y Cereales': '🌾', 'Bebidas': '🥤',
+                        'Lácteos': '🥛', 'Refrigerados': '❄️', 'Congelados': '🧊',
+                        'Limpieza': '🧽', 'Cuidado Personal': '🧴', 'Hogar': '🏠',
+                        'Snacks': '🍿', 'Panadería': '🍞', 'Carnes': '🥩',
+                        'Uncategorized': '📦'
+                    }[category.category] || '📦';
+                    
+                    const importance = category.total_frequency >= 200 ? { text: '🔥 Muy Importante', color: '#ef4444' } :
+                                     category.total_frequency >= 100 ? { text: '⚡ Importante', color: '#f59e0b' } :
+                                     category.total_frequency >= 50 ? { text: '👍 Moderada', color: '#3b82f6' } :
+                                     { text: '📊 Ocasional', color: '#64748b' };
+                    
+                    categoriesHtml += `<div class="category-card" style="position:relative;border-left:4px solid ${importance.color};background:rgba(15,23,42,0.3);margin-bottom:12px;padding:16px;border-radius:8px">
+                        <div style="position:absolute;top:8px;right:8px;background:${importance.color}20;color:${importance.color};padding:2px 6px;border-radius:8px;font-size:10px;font-weight:600">
+                            ${importance.text}
+                        </div>
+                        <div class="category-header" style="margin-bottom:12px">
+                            <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+                                <div class="category-icon" style="font-size:24px">${categoryIcon}</div>
+                                <div class="category-info" style="flex:1">
+                                    <div class="category-title" style="font-size:16px;font-weight:bold;margin-bottom:4px">${category.category}</div>
+                                    <div class="category-stats" style="font-size:12px;color:#94a3b8">${category.product_count} productos • ${category.brands_count} marcas • ${category.total_frequency} picks totales</div>
+                                </div>
+                            </div>
+                            <div style="background:rgba(59,130,246,0.1);padding:8px;border-radius:6px">
+                                <div style="font-size:11px;color:#cbd5e1;font-weight:600;margin-bottom:4px">📊 Estadísticas:</div>
+                                <div style="display:flex;justify-content:space-between;font-size:11px;color:#94a3b8">
+                                    <span>Promedio por producto: ${(category.total_frequency / category.product_count).toFixed(1)} picks</span>
+                                    <span>Diversidad: ${(category.brands_count / category.product_count * 100).toFixed(0)}% marcas únicas</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="category-preview" style="background:rgba(255,255,255,0.05);padding:10px;border-radius:6px">
+                            <div style="font-size:11px;color:#cbd5e1;font-weight:600;margin-bottom:6px">🏆 Productos destacados:</div>`;
+                    
+                    category.products.slice(0, 5).forEach((product, prodIndex) => {
+                        const highlight = prodIndex < 3 ? 'font-weight:600;' : '';
+                        categoriesHtml += `<div class="mini-product" style="${highlight}font-size:11px;margin:3px 0;color:#e2e8f0">${product.brand} - ${product.name.substring(0, 40)}${product.name.length > 40 ? '...' : ''}</div>`;
+                    });
+                    
+                    if (category.products.length > 5) {
+                        categoriesHtml += `<div class="more-items" style="font-size:11px;color:#64748b;font-style:italic;margin-top:6px">... y ${category.products.length - 5} productos más en esta categoría</div>`;
+                    }
+                    
+                    categoriesHtml += '</div></div>';
+                });
+                container.innerHTML = categoriesHtml;
+            }
+        }, 100);
+    }
+    
+    html += '</div></div>';
+    return html;
+}
+async function handleProductSearch(e){const query=e.target.value.trim();const resultsDiv=document.getElementById('searchResults');if(query.length<2){resultsDiv.innerHTML='<div style="text-align:center;color:#94a3b8;padding:20px">Escribe al menos 2 caracteres...</div>';return;}if(query.length<3&&query!==e.target.value.trim())return;try{const products=await searchProducts(query);if(products.length===0){resultsDiv.innerHTML='<div style="text-align:center;color:#94a3b8;padding:20px">No se encontraron productos</div>';return;}let html='';products.forEach(product=>{html+='<div class="product-item">';html+=`<div class="product-brand">${product.brand}</div>`;html+=`<div class="product-name">${product.name}</div>`;html+=`<div class="product-details">Frecuencia: ${product.frequency} • Precio: $${product.avg_price_per_unit}</div>`;if(product.locations&&product.locations.length>0){html+=`<div class="product-location">${product.locations[0]}</div>`;}html+='</div>';});resultsDiv.innerHTML=html;}catch(e){resultsDiv.innerHTML='<div style="text-align:center;color:#ef4444;padding:20px">Error al buscar productos</div>';}}
+async function showLocationProducts(location){try{const data=await getProductsByLocation(location);const resultsDiv=document.getElementById('locationsList');let html=`<div class="card-title" style="margin-bottom:16px">📍 ${location} (${data.products.length} productos)</div>`;data.products.forEach(product=>{html+='<div class="product-item">';html+=`<div class="product-brand">${product.brand}</div>`;html+=`<div class="product-name">${product.name}</div>`;html+=`<div class="product-details">Frecuencia: ${product.frequency} • $${product.avg_price_per_unit}</div>`;html+='</div>';});html+=`<div style="text-align:center;margin-top:16px"><button class="nav-tab" onclick="currentProductTab='locations';renderDashboard(cachedData)">⬅️ Volver a ubicaciones</button></div>`;resultsDiv.innerHTML=html;}catch(e){console.error('Error:',e);}}
+function renderSimulations(allTime, today, week, month, records) {
+    let html = '<div class="section active">';
+    
+    // Helper calculations
+    const avgEarningsPerOrder = allTime.total_orders > 0 ? Math.round(allTime.total_earned / allTime.total_orders) : 2400; // More pessimistic fallback for conservative planning
+    const avgSkusPerOrder = allTime.total_orders > 0 ? Math.round(allTime.total_skus / allTime.total_orders) : 0;
+    const avgTimePerOrder = allTime.total_orders > 0 ? Math.round((allTime.total_skus / allTime.avg_speed) * 60 / allTime.total_orders) : 0;
+    
+    // Monthly calculations (make them available throughout the function)
+    const monthlyAvgEarningsPerOrder = month.orders > 0 ? Math.round(month.earned / month.orders) : 0;
+    const monthlyAvgSpeed = month.speed || 0;
+    
+    // Interactive simulations header
+    html += '<div class="card">';
+    html += '<div class="card-title">🎯 Simulaciones y Proyecciones</div>';
+    html += '<div style="background:rgba(59,130,246,0.1);padding:12px;border-radius:8px;margin-bottom:16px;font-size:12px;color:#94a3b8">';
+    html += '💡 <strong>¿Qué pasaría si...?</strong> Explora diferentes escenarios para optimizar tu rendimiento y planificar tus metas.';
+    html += '</div>';
+    html += '</div>';
+    
+    // Monthly projections simulator
+    html += '<div class="card">';
+    html += '<div class="card-title">📊 Simulador de Ingresos Mensuales</div>';
+    html += '<div style="margin-bottom:16px">';
+    html += '<div style="background:rgba(15,23,42,0.5);padding:16px;border-radius:12px">';
+    html += '<div style="font-size:13px;color:#cbd5e1;font-weight:600;margin-bottom:12px">Ajusta los parámetros para ver diferentes escenarios:</div>';
+    
+    // Input controls for simulation
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">';
+    html += '<div>';
+    html += '<label style="display:block;font-size:11px;color:#94a3b8;margin-bottom:4px">Pedidos por mes:</label>';
+    html += '<input type="range" id="ordersPerMonth" min="0" max="300" value="154" oninput="updateMonthlyProjection()" style="width:100%">';
+    html += '<div id="ordersValue" style="font-size:11px;color:#3b82f6;text-align:center">154 pedidos</div>';
+    html += '<div id="ordersPerDay" style="font-size:10px;color:#94a3b8;text-align:center">~7.0 pedidos/día</div>';
+    html += '</div>';
+    html += '<div>';
+    html += '<label style="display:block;font-size:11px;color:#94a3b8;margin-bottom:4px">Ganancia promedio por pedido:</label>';
+    html += '<input type="range" id="earningsPerOrder" min="1040" max="4500" value="2400" oninput="updateMonthlyProjection()" style="width:100%">';
+    html += '<div id="earningsValue" style="font-size:11px;color:#10b981;text-align:center">$2.400</div>';
+    html += '</div>';
+    html += '</div>';
+    
+    // Results display
+    html += '<div id="monthlyProjectionResult" style="background:rgba(16,185,129,0.1);padding:16px;border-radius:8px;text-align:center">';
+    html += '<div style="font-size:18px;font-weight:bold;color:#10b981" id="projectedEarnings">$' + formatLocalNumber(154 * avgEarningsPerOrder) + '</div>';
+    html += '<div style="font-size:12px;color:#94a3b8;margin-top:4px">Ingresos mensuales proyectados</div>';
+    html += '</div>';
+    html += '</div>';
+    html += '</div>';
+    html += '</div>';
+    
+    // Speed improvement scenarios
+    html += '<div class="card">';
+    html += '<div class="card-title">⚡ Escenarios de Mejora de Velocidad</div>';
+    html += '<div style="display:grid;grid-template-columns:1fr;gap:12px">';
+    
+    const speedScenarios = [
+        { name: 'Mantener velocidad actual', speed: allTime.avg_speed, color: '#6b7280', icon: '➡️' },
+        { name: 'Mejora del 15%', speed: allTime.avg_speed * 1.15, color: '#3b82f6', icon: '📈' },
+        { name: 'Mejora del 30%', speed: allTime.avg_speed * 1.3, color: '#10b981', icon: '🚀' },
+        { name: 'Alcanzar 20 SKUs/h', speed: 20, color: '#f59e0b', icon: '🎯' },
+        { name: 'Alcanzar 25 SKUs/h', speed: 25, color: '#ef4444', icon: '🔥' }
+    ];
+    
+    speedScenarios.forEach(scenario => {
+        const timeReduction = avgTimePerOrder > 0 ? Math.round(avgTimePerOrder - (avgSkusPerOrder / scenario.speed * 60)) : 0;
+        const dailyOrdersPossible = scenario.speed > 0 ? Math.floor(8 * 60 / (avgSkusPerOrder / scenario.speed * 60)) : 0;
+        const potentialDailyEarnings = dailyOrdersPossible * avgEarningsPerOrder;
+        
+        html += '<div style="background:rgba(15,23,42,0.5);padding:12px;border-radius:8px;border-left:3px solid ' + scenario.color + '">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+        html += '<div style="font-weight:600;color:' + scenario.color + '">' + scenario.icon + ' ' + scenario.name + '</div>';
+        html += '<div style="font-size:14px;font-weight:bold;color:#fff">' + scenario.speed.toFixed(1) + ' SKUs/h</div>';
+        html += '</div>';
+        html += '<div style="font-size:11px;color:#94a3b8;display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+        html += '<div>⏱️ ' + (timeReduction > 0 ? 'Ahorro: ' + timeReduction + ' min/pedido' : 'Tiempo actual') + '</div>';
+        html += '<div>📋 Hasta ' + dailyOrdersPossible + ' pedidos/día (8h)</div>';
+        html += '<div>💰 Potencial diario: $' + formatLocalNumber(potentialDailyEarnings) + '</div>';
+        html += '<div>📈 Potencial mensual: $' + formatLocalNumber(potentialDailyEarnings * 22) + '</div>';
+        html += '</div>';
+        html += '</div>';
+    });
+    
+    html += '</div>';
+    html += '</div>';
+    
+    // Goal setting simulator
+    html += '<div class="card">';
+    html += '<div class="card-title">🎯 Simulador de Metas</div>';
+    html += '<div style="background:rgba(15,23,42,0.5);padding:16px;border-radius:12px">';
+    html += '<div style="font-size:13px;color:#cbd5e1;font-weight:600;margin-bottom:12px">Define tu meta mensual de ingresos:</div>';
+    
+    html += '<div style="margin-bottom:16px">';
+    html += '<label style="display:block;font-size:11px;color:#94a3b8;margin-bottom:4px">Meta de ingresos mensuales:</label>';
+    html += '<input type="range" id="monthlyGoal" min="150000" max="1200000" step="1000" value="400000" oninput="updateGoalCalculator()" style="width:100%">';
+    html += '<div id="goalValue" style="font-size:11px;color:#f59e0b;text-align:center">$400,000</div>';
+    html += '</div>';
+    
+    html += '<div id="goalResults" style="background:rgba(245,158,11,0.1);padding:12px;border-radius:8px">';
+    html += '<div style="font-size:12px;color:#cbd5e1;font-weight:600;margin-bottom:8px">Para alcanzar tu meta necesitas:</div>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px;color:#94a3b8">';
+    html += '<div id="ordersNeeded">📋 30 pedidos/mes</div>';
+    html += '<div id="dailyOrders">📅 1.4 pedidos/día</div>';
+    html += '<div id="hoursNeeded">⏰ 2.5 horas de picking/día</div>';
+    html += '<div id="feasibility">🎯 Muy factible</div>';
+    html += '</div>';
+    html += '</div>';
+    html += '<div style="font-size:10px;color:#64748b;margin-top:8px;text-align:center;font-style:italic">';
+    html += 'ℹ️ Cálculos basados en tiempo activo de picking. No incluye tiempo de turno o esperas entre pedidos.';
+    html += '</div>';
+    html += '</div>';
+    html += '</div>';
+    
+    // Current performance values display
+    html += '<div class="card">';
+    html += '<div class="card-title">📈 Tus Valores Actuales</div>';
+    html += '<div style="background:rgba(34,197,94,0.1);padding:12px;border-radius:8px;margin-bottom:16px">';
+    html += '<div style="text-align:center;color:#22c55e;font-weight:600;margin-bottom:12px">Valores usados en las comparaciones</div>';
+    
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">';
+    
+    // Historic (All-time) values
+    html += '<div style="background:rgba(15,23,42,0.4);padding:12px;border-radius:8px">';
+    html += '<div style="color:#f59e0b;font-weight:600;text-align:center;margin-bottom:8px;font-size:12px">📊 Histórico (Total)</div>';
+    html += '<div style="display:grid;grid-template-columns:1fr;gap:8px">';
+    html += '<div style="background:rgba(15,23,42,0.3);padding:6px;border-radius:4px;text-align:center">';
+    html += '<div style="color:#94a3b8;font-size:10px;margin-bottom:2px">Velocidad Promedio</div>';
+    html += '<div style="color:#f59e0b;font-weight:600;font-size:11px">' + (allTime.avg_speed || 0).toFixed(1) + ' SKUs/h</div>';
+    html += '</div>';
+    html += '<div style="background:rgba(15,23,42,0.3);padding:6px;border-radius:4px;text-align:center">';
+    html += '<div style="color:#94a3b8;font-size:10px;margin-bottom:2px">Ganancia por Pedido</div>';
+    html += '<div style="color:#f59e0b;font-weight:600;font-size:11px">$' + formatLocalNumber(avgEarningsPerOrder) + '</div>';
+    html += '</div>';
+    html += '<div style="color:#64748b;font-size:9px;text-align:center;margin-top:4px">' + (allTime.total_orders || 0) + ' pedidos totales</div>';
+    html += '</div>';
+    html += '</div>';
+    
+    // Monthly values
+    html += '<div style="background:rgba(15,23,42,0.4);padding:12px;border-radius:8px">';
+    html += '<div style="color:#22c55e;font-weight:600;text-align:center;margin-bottom:8px;font-size:12px">📅 Este Mes</div>';
+    html += '<div style="display:grid;grid-template-columns:1fr;gap:8px">';
+    html += '<div style="background:rgba(15,23,42,0.3);padding:6px;border-radius:4px;text-align:center">';
+    html += '<div style="color:#94a3b8;font-size:10px;margin-bottom:2px">Velocidad Promedio</div>';
+    html += '<div style="color:#22c55e;font-weight:600;font-size:11px">' + monthlyAvgSpeed.toFixed(1) + ' SKUs/h</div>';
+    html += '</div>';
+    html += '<div style="background:rgba(15,23,42,0.3);padding:6px;border-radius:4px;text-align:center">';
+    html += '<div style="color:#94a3b8;font-size:10px;margin-bottom:2px">Ganancia por Pedido</div>';
+    html += '<div style="color:#22c55e;font-weight:600;font-size:11px">$' + formatLocalNumber(monthlyAvgEarningsPerOrder) + '</div>';
+    html += '</div>';
+    html += '<div style="color:#64748b;font-size:9px;text-align:center;margin-top:4px">' + (month.orders || 0) + ' pedidos este mes</div>';
+    html += '</div>';
+    html += '</div>';
+    
+    html += '</div>';
+    
+    html += '<div style="font-size:10px;color:#64748b;margin-top:8px;text-align:center;font-style:italic">';
+    html += '💡 Las comparaciones de benchmarks usan los valores históricos (totales)';
+    if (allTime.total_orders === 0) {
+        html += ' - Usando valores conservadores por defecto';
+    }
+    html += '</div>';
+    html += '</div>';
+    html += '</div>';
+    
+    // Performance comparison simulator
+    html += '<div class="card">';
+    html += '<div class="card-title">📊 Comparador de Rendimiento</div>';
+    html += '<div style="background:rgba(139,92,246,0.1);padding:12px;border-radius:8px;margin-bottom:16px">';
+    html += '<div style="text-align:center;color:#8b5cf6;font-weight:600;margin-bottom:8px">Tu Rendimiento vs. Benchmarks de la Industria</div>';
+    html += '</div>';
+    
+    const benchmarks = [
+        { level: 'Mínimo', speed: 8, color: '#6b7280', earnings: 1300 },
+        { level: 'Principiante', speed: 15, color: '#64748b', earnings: 2000 },
+        { level: 'Intermedio', speed: 20, color: '#3b82f6', earnings: 2800 },
+        { level: 'Avanzado', speed: 25, color: '#10b981', earnings: 3200 },
+        { level: 'Experto', speed: 30, color: '#f59e0b', earnings: 3600 },
+        { level: 'Elite', speed: 35, color: '#ef4444', earnings: 4000 }
+    ];
+    
+    html += '<div style="display:grid;grid-template-columns:1fr;gap:8px">';
+    
+    benchmarks.forEach(benchmark => {
+        // Check if this is the historic level
+        const isHistoricLevel = allTime.avg_speed >= benchmark.speed - 2 && allTime.avg_speed <= benchmark.speed + 2;
+        
+        // Check if this is the monthly level  
+        const isMonthlyLevel = monthlyAvgSpeed > 0 && monthlyAvgSpeed >= benchmark.speed - 2.5 && monthlyAvgSpeed <= benchmark.speed + 2.5;
+        
+        // Determine background opacity and border
+        let backgroundOpacity = '0.3';
+        let borderStyle = '';
+        let levelIndicators = [];
+        
+        if (isHistoricLevel && isMonthlyLevel) {
+            // Both levels match this benchmark
+            backgroundOpacity = '0.8';
+            borderStyle = 'border:3px solid ' + benchmark.color + ';';
+            levelIndicators = ['📊', '📅'];
+        } else if (isHistoricLevel) {
+            // Only historic level matches
+            backgroundOpacity = '0.6';
+            borderStyle = 'border:2px solid ' + benchmark.color + '; border-style: solid;';
+            levelIndicators = ['📊'];
+        } else if (isMonthlyLevel) {
+            // Only monthly level matches
+            backgroundOpacity = '0.6';
+            borderStyle = 'border:2px dashed ' + benchmark.color + ';';
+            levelIndicators = ['📅'];
+        }
+        
+        const speedComparison = allTime.avg_speed >= benchmark.speed ? '✅' : '❌';
+        const earningsComparison = avgEarningsPerOrder >= benchmark.earnings ? '✅' : '❌';
+        
+        html += '<div style="background:rgba(15,23,42,' + backgroundOpacity + ');padding:8px;border-radius:6px;' + borderStyle + '">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center">';
+        html += '<div style="font-weight:600;color:' + benchmark.color + '">';
+        if (levelIndicators.length > 0) {
+            html += levelIndicators.join(' + ') + ' ';
+        }
+        html += benchmark.level + '</div>';
+        html += '<div style="display:flex;gap:12px;font-size:11px">';
+        html += '<div style="color:#94a3b8">' + speedComparison + ' ' + benchmark.speed + ' SKUs/h</div>';
+        html += '<div style="color:#94a3b8">' + earningsComparison + ' $' + formatLocalNumber(benchmark.earnings) + '/pedido</div>';
+        html += '</div>';
+        html += '</div>';
+        
+        html += '</div>';
+    });
+    html += '</div>';
+    html += '</div>';
+    
+    html += '</div>';
+    
+    return html;
+}
+
+function renderMap(layout) {
+    const zones = layout.zones || [];
+    const aisles = layout.aisles || [];
+    const walls = layout.walls || [];
+    const minX = 400;
+    const minY = -2700;
+    const maxX = 3400;
+    const maxY = 600;
+    const layoutWidth = maxX - minX;
+    const layoutHeight = maxY - minY;
+    
+    const zoneTypes = {
+        'dry_shelves': {name: 'Abarrotes', color: '#f59e0b'},
+        'produce': {name: 'Frutas y Verduras', color: '#10b981'},
+        'fridges': {name: 'Refrigerados', color: '#06b6d4'},
+        'freezers': {name: 'Congelados', color: '#3b82f6'},
+        'chilled_produce': {name: 'Refrigerados Frescos', color: '#22c55e'},
+        'prepared_meals': {name: 'Comidas Preparadas', color: '#14b8a6'},
+        'cecineria': {name: 'Cecinería', color: '#ef4444'},
+        'frontera': {name: 'Frontera', color: '#8b5cf6'},
+        'ice_dispenser': {name: 'Dispensador Hielo', color: '#0ea5e9'},
+        'bagging': {name: 'Mesas Embolsado', color: '#64748b'},
+        'backpacks': {name: 'Mochilas', color: '#a855f7'},
+        'handoff': {name: 'Despacho/Entrega', color: '#fb923c'},
+        'aisle': {name: 'Pasillos', color: '#475569'}
+    };
+    
+    let svg = '<div class="section active"><div class="card"><div class="card-title">🗺️ Mapa de Darkstore</div><div class="map-container">';
+    svg += '<svg class="map-svg" viewBox="' + minX + ' ' + minY + ' ' + layoutWidth + ' ' + layoutHeight + '" xmlns="http://www.w3.org/2000/svg">';
+    
+    walls.forEach(w => {
+        svg += '<rect class="wall-rect" x="' + w.x + '" y="' + w.y + '" width="' + w.width + '" height="' + w.height + '" stroke="' + (w.border_color || '#64748b') + '"/>';
+    });
+    
+    zones.forEach(z => {
+        svg += '<rect class="zone-rect" x="' + z.x + '" y="' + z.y + '" width="' + z.width + '" height="' + z.height + '" fill="' + z.color + '"/>';
+        if (z.label) {
+            svg += '<text class="zone-label" x="' + (z.x + z.width/2) + '" y="' + (z.y + z.height/2) + '" text-anchor="middle" dominant-baseline="middle">' + z.label + '</text>';
+        }
+    });
+    
+    aisles.forEach(a => {
+        svg += '<rect class="aisle-rect" x="' + a.x + '" y="' + a.y + '" width="' + a.width + '" height="' + a.height + '" fill="' + a.color + '"/>';
+        if (a.label) {
+            svg += '<text class="zone-label" x="' + (a.x + a.width/2) + '" y="' + (a.y + a.height/2) + '" text-anchor="middle" dominant-baseline="middle">' + a.label + '</text>';
+        }
+    });
+    
+    svg += '</svg></div>';
+    svg += '<div class="legend">';
+    Object.entries(zoneTypes).forEach(([key, val]) => {
+        svg += '<div class="legend-item"><div class="legend-color" style="background:' + val.color + '"></div><span>' + val.name + '</span></div>';
+    });
+    svg += '</div></div></div>';
+    return svg;
+}
+function updateLastRefresh(){const n=new Date();const t=n.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});document.getElementById('lastUpdate').textContent='Ultima actualizacion: '+t;}
+
+// Simulation functions
+function updateMonthlyProjection() {
+    const orders = document.getElementById('ordersPerMonth').value;
+    const earnings = document.getElementById('earningsPerOrder').value;
+    const totalEarnings = orders * earnings;
+    const ordersPerDay = (orders / 22).toFixed(1); // 22 working days per month
+    
+    document.getElementById('ordersValue').textContent = orders + ' pedidos';
+    document.getElementById('ordersPerDay').textContent = '~' + ordersPerDay + ' pedidos/día';
+    document.getElementById('earningsValue').textContent = '$' + formatLocalNumber(parseInt(earnings));
+    document.getElementById('projectedEarnings').textContent = '$' + formatLocalNumber(totalEarnings);
+}
+
+function updateGoalCalculator() {
+    const goal = document.getElementById('monthlyGoal').value;
+    const avgEarnings = 2400; // More pessimistic value for conservative goal planning
+    
+    const ordersNeeded = Math.ceil(goal / avgEarnings);
+    const dailyOrders = (ordersNeeded / 22).toFixed(1);
+    const avgTimePerOrder = 45; // Active picking time per order (not including dead time)
+    const hoursNeeded = (dailyOrders * avgTimePerOrder / 60).toFixed(1);
+    
+    let feasibility = 'Muy factible';
+    if (hoursNeeded > 6) feasibility = 'Requiere dedicación alta';
+    else if (hoursNeeded > 4) feasibility = 'Moderado';
+    else if (hoursNeeded > 2) feasibility = 'Factible';
+    
+    document.getElementById('goalValue').textContent = '$' + formatLocalNumber(parseInt(goal));
+    document.getElementById('ordersNeeded').textContent = '📋 ' + ordersNeeded + ' pedidos/mes';
+    document.getElementById('dailyOrders').textContent = '📅 ' + dailyOrders + ' pedidos/día';
+    document.getElementById('hoursNeeded').textContent = '⏰ ' + hoursNeeded + ' horas de picking/día';
+    document.getElementById('feasibility').textContent = '🎯 ' + feasibility;
+}
+function refreshData(){fetchData();}
+fetchData();
+setInterval(fetchData,120000);
+</script>
+</body>
+</html>

@@ -1,15 +1,13 @@
 """
-Web Dashboard for Picking Performance Tracker
-Mobile-friendly interface for viewing stats on the go
+Simple Picking Dashboard
+Basic Flask app for viewing order data from Google Sheets
 """
 
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 import os
 import pandas as pd
 import requests
 from io import StringIO
-from datetime import datetime, timedelta
-import json
 
 app = Flask(__name__)
 
@@ -19,892 +17,351 @@ def get_sheet_url():
         raise RuntimeError("GOOGLE_SHEET_URL environment variable is not set")
     return url
 
+def get_tier(sku_per_hour):
+    """Classify efficiency into tiers based on SKU/hour"""
+    if sku_per_hour >= 35: return 'optimal'
+    if sku_per_hour >= 30: return 'excellent'
+    if sku_per_hour >= 20: return 'good'
+    if sku_per_hour >= 15: return 'medium'
+    return 'poor'
+
+def add_metrics(df):
+    """Add calculated metrics to dataframe"""
+    # Only calculate time-based metrics for non-ignored orders
+    df['SKUPerHour'] = None
+    df['MinPerSKU'] = None
+    df['Tier'] = 'ignored'
+    
+    valid_mask = ~df['Ignorar']
+    df.loc[valid_mask, 'SKUPerHour'] = (df.loc[valid_mask, 'SKUs'] / (df.loc[valid_mask, 'TiempoMin'] / 60)).round(1)
+    df.loc[valid_mask, 'MinPerSKU'] = (df.loc[valid_mask, 'TiempoMin'] / df.loc[valid_mask, 'SKUs']).round(1)
+    df.loc[valid_mask, 'Tier'] = df.loc[valid_mask, 'SKUPerHour'].apply(get_tier)
+    
+    return df
+
 def load_data():
     """Fetch latest data from Google Sheets"""
-    response = requests.get(get_sheet_url(), timeout=10)
-    response.raise_for_status()
-    # Ensure UTF-8 decoding
-    csv_text = response.content.decode('utf-8')
-    df = pd.read_csv(StringIO(csv_text))
+    try:
+        response = requests.get(get_sheet_url(), timeout=10)
+        response.raise_for_status()
+        
+        # Ensure UTF-8 decoding
+        csv_text = response.content.decode('utf-8')
+        df = pd.read_csv(StringIO(csv_text))
 
-    # Normalize string columns to fix encoding issues
-    for col in ['Cliente', 'Marca', 'Producto', 'Ubicacion', 'Estante', 'Pasillo', 'Tipo']:
-        if col in df.columns:
-            df[col] = df[col].astype(str).apply(lambda x: x.encode('latin1').decode('utf-8') if '\ufffd' in x or 'Ã' in x else x)
-
-    # Process data
-    df['Fecha'] = pd.to_datetime(df['Fecha'], format='%d/%m/%Y', errors='coerce')
-    df['SKUs'] = pd.to_numeric(df['SKUs'], errors='coerce').fillna(0).astype(int)
-    
-    # Handle Tipo column (if present)
-    if 'Tipo' not in df.columns:
-        df['Tipo'] = 'Mono'  # Default to Mono if no Tipo column
-
-    # Parse tiempo (supports H:MM format like 1:20 = 1 hour 20 mins = 80 mins)
-    def parse_time(t):
-        if pd.isna(t) or t == '':
-            return 0
-        try:
-            parts = str(t).split(':')
-            if len(parts) == 2:
-                hours = int(parts[0])
-                mins = int(parts[1])
-                return hours * 60 + mins
-            return 0
-        except:
-            return 0
-
-    df['Tiempo_mins'] = df['Tiempo'].apply(parse_time)
-
-    # Filter out ignored orders for performance metrics
-    # Treat NaN as False (don't ignore), only filter out explicit True values
-    df.loc[df['Ignorar'].isna(), 'Ignorar'] = False
-    df_filtered = df[df['Ignorar'] == False].copy()
-
-    return df, df_filtered
-
-def calculate_earnings(row):
-    """Calculate earnings for an order - handles both Mono and Bipicking"""
-    skus = row.get('SKUs', 0)
-    fecha = row.get('Fecha')
-    cliente = str(row.get('Cliente', ''))
-    
-    # Check for explicit Tipo column first
-    if 'Tipo' in row and pd.notna(row['Tipo']) and str(row['Tipo']).strip():
-        tipo_str = str(row['Tipo']).lower().strip()
-        is_bipicking = tipo_str in ['bi', 'bipicking', 'bip', 'b']
-    else:
-        # Bipicking detection based on client name containing (A) or (B)
-        is_bipicking = '(A)' in cliente or '(B)' in cliente
-    
-    # Calculate base earnings based on your actual October rates
-    if is_bipicking:
-        # Bipicking: 60 CLP/SKU + 1040 base (from your Oct data: $1,040 base)
-        base = 60 * skus + 1040
-    else:
-        # Mono picking: 75 CLP/SKU + 1300 base (from your Oct data: $1,300 base)
-        base = 75 * skus + 1300
-    
-    # Sunday multiplier (1.2x)
-    if pd.notna(fecha) and hasattr(fecha, 'weekday') and fecha.weekday() == 6:
-        base *= 1.2
-    
-    return int(base)
+        # Basic data processing
+        df['Fecha'] = pd.to_datetime(df['Fecha'], format='%d/%m/%Y', errors='coerce')
+        df['SKUs'] = pd.to_numeric(df['SKUs'], errors='coerce').fillna(0).astype(int)
+        
+        # Handle Ignorar column (convert to boolean)
+        if 'Ignorar' in df.columns:
+            df['Ignorar'] = df['Ignorar'].fillna(False).astype(bool)
+        else:
+            df['Ignorar'] = False
+        
+        # Parse tiempo (supports H:MM format like 1:20 = 1 hour 20 mins = 80 mins)
+        def parse_time(t):
+            if pd.isna(t) or t == '':
+                return 0
+            try:
+                parts = str(t).split(':')
+                if len(parts) == 2:
+                    hours = int(parts[0])
+                    mins = int(parts[1])
+                    return hours * 60 + mins
+                return 0
+            except:
+                return 0
+        
+        df['TiempoMin'] = df['Tiempo'].apply(parse_time)
+        df = df[df['TiempoMin'] > 0]  # Filter out invalid times
+        
+        return df
+        
+    except Exception as e:
+        print(f"Error loading data: {e}")
+        return pd.DataFrame()
 
 @app.route('/')
-def home():
-    """Main dashboard"""
+def dashboard():
+    """Main dashboard page"""
     return render_template('index.html')
 
-@app.route('/api/today')
-def today_stats():
-    """Get today's stats"""
-    df, df_filtered = load_data()
+@app.route('/api/orders')
+def get_orders():
+    """API endpoint to get all orders with optional filtering and calculated metrics"""
+    df = load_data()
     
-    today = datetime.now().date()
-    today_orders_all = df[df['Fecha'].dt.date == today]  # All orders including ignored
-    today_orders_filtered = df_filtered[df_filtered['Fecha'].dt.date == today]  # Non-ignored only
+    if df.empty:
+        return jsonify({'orders': [], 'summary': {}})
     
-    if len(today_orders_all) == 0:
-        return jsonify({
-            'orders': 0,
-            'skus': 0,
-            'time': 0,
-            'speed': 0,
-            'earned': 0,
-            'date': today.strftime('%d/%m/%Y'),
-            'date_formatted': today.strftime('%d de %B')
-        })
+    # Calculate metrics for all orders
+    df = add_metrics(df)
     
-    # Performance metrics from non-ignored orders only
-    total_skus = today_orders_filtered['SKUs'].sum()
-    total_time = today_orders_filtered['Tiempo_mins'].sum()
-    speed = (total_skus / total_time * 60) if total_time > 0 else 0
+    # Apply filters
+    search = request.args.get('search', '').lower()
+    limit = request.args.get('limit', 200, type=int)
+    grouping = request.args.get('grouping', 'none')
     
-    # Calculate earnings from ALL orders (including ignored)
-    earnings = []
-    for _, row in today_orders_all.iterrows():
-        earnings.append(calculate_earnings(row))
-    earned = sum(earnings)
+    # Filter by search term (searches in Cliente field)
+    if search:
+        df = df[df['Cliente'].str.lower().str.contains(search, na=False)]
     
-    return jsonify({
-        'orders': len(today_orders_all),  # Count ALL orders
-        'skus': int(total_skus),
-        'time': int(total_time),
-        'speed': round(speed, 1),
-        'earned': int(earned),
-        'date': today.strftime('%d/%m/%Y'),
-        'date_formatted': today.strftime('%d de %B')
-    })
-
-@app.route('/api/week')
-def week_stats():
-    """Get this week's stats"""
-    df, df_filtered = load_data()
+    # Sort by date (most recent first), handling NaT values
+    df = df.sort_values('Fecha', ascending=False, na_position='last')
     
-    today = datetime.now().date()
-    week_start = today - timedelta(days=today.weekday())
-    
-    week_orders_all = df[(df['Fecha'].dt.date >= week_start) & 
-                         (df['Fecha'].dt.date <= today)]  # All orders including ignored
-    week_orders_filtered = df_filtered[(df_filtered['Fecha'].dt.date >= week_start) & 
-                                       (df_filtered['Fecha'].dt.date <= today)]  # Non-ignored only
-    
-    if len(week_orders_all) == 0:
-        return jsonify({
-            'orders': 0,
-            'skus': 0,
-            'time': 0,
-            'speed': 0,
-            'earned': 0,
-            'week_start': week_start.strftime('%d/%m'),
-            'week_end': today.strftime('%d/%m'),
-            'date_formatted': f"{week_start.strftime('%d/%m')} - {today.strftime('%d/%m')}"
-        })
-    
-    # Performance metrics from non-ignored orders only
-    total_skus = week_orders_filtered['SKUs'].sum()
-    total_time = week_orders_filtered['Tiempo_mins'].sum()
-    speed = (total_skus / total_time * 60) if total_time > 0 else 0
-    
-    # Calculate earnings from ALL orders (including ignored)
-    earnings = []
-    for _, row in week_orders_all.iterrows():
-        earnings.append(calculate_earnings(row))
-    earned = sum(earnings)
-    
-    return jsonify({
-        'orders': len(week_orders_all),  # Count ALL orders
-        'skus': int(total_skus),
-        'time': int(total_time),
-        'speed': round(speed, 1),
-        'earned': int(earned),
-        'week_start': week_start.strftime('%d/%m'),
-        'week_end': today.strftime('%d/%m'),
-        'date_formatted': f"{week_start.strftime('%d/%m')} - {today.strftime('%d/%m')}"
-    })
-
-@app.route('/api/recent')
-def recent_orders():
-    """Get last 10 orders"""
-    df, df_filtered = load_data()
-    
-    recent = df_filtered.nlargest(10, 'Fecha')
-    
-    orders = []
-    for _, row in recent.iterrows():
-        time_mins = row['Tiempo_mins']
-        speed = (row['SKUs'] / time_mins * 60) if time_mins > 0 else 0
-        earnings = calculate_earnings(row)
-        
-        # Determine order type for display
-        cliente = str(row.get('Cliente', ''))
-        
-        if 'Tipo' in row and pd.notna(row['Tipo']) and str(row['Tipo']).strip():
-            tipo_str = str(row['Tipo']).lower().strip()
-            order_type = 'Bipicking' if tipo_str in ['bi', 'bipicking', 'bip', 'b'] else 'Mono'
-        else:
-            # Bipicking detection based on client name containing (A) or (B)
-            order_type = 'Bipicking' if ('(A)' in cliente or '(B)' in cliente) else 'Mono'
-        
-        orders.append({
-            'fecha': row['Fecha'].strftime('%d/%m') if pd.notna(row['Fecha']) else '',
-            'cliente': str(row.get('Cliente', ''))[:20],
-            'skus': int(row['SKUs']),
-            'tiempo': str(row.get('Tiempo', '')),
-            'speed': round(speed, 1),
-            'earnings': earnings,
-            'tipo': order_type
-        })
-    
-    return jsonify(orders)
-
-@app.route('/api/stats')
-def general_stats():
-    """Get general statistics"""
-    df, df_filtered = load_data()
-    
-    total_orders = len(df_filtered)
-    total_skus = df_filtered['SKUs'].sum()
-    total_time = df_filtered['Tiempo_mins'].sum()
-    avg_speed = (total_skus / total_time * 60) if total_time > 0 else 0
-    
-    # Last 2 weeks comparison
-    today = datetime.now().date()
-    two_weeks_ago = today - timedelta(days=14)
-    four_weeks_ago = today - timedelta(days=28)
-    
-    recent = df_filtered[(df_filtered['Fecha'].dt.date >= two_weeks_ago) & 
-                        (df_filtered['Fecha'].dt.date <= today)]
-    previous = df_filtered[(df_filtered['Fecha'].dt.date >= four_weeks_ago) & 
-                          (df_filtered['Fecha'].dt.date < two_weeks_ago)]
-    
-    recent_speed = (recent['SKUs'].sum() / recent['Tiempo_mins'].sum() * 60) if recent['Tiempo_mins'].sum() > 0 else 0
-    previous_speed = (previous['SKUs'].sum() / previous['Tiempo_mins'].sum() * 60) if previous['Tiempo_mins'].sum() > 0 else 0
-    
-    change = ((recent_speed - previous_speed) / previous_speed * 100) if previous_speed > 0 else 0
-    
-    return jsonify({
-        'total_orders': int(total_orders),
-        'total_skus': int(total_skus),
-        'avg_speed': round(avg_speed, 1),
-        'recent_speed': round(recent_speed, 1),
-        'previous_speed': round(previous_speed, 1),
-        'change_percent': round(change, 1)
-    })
-
-@app.route('/api/month')
-def month_stats():
-    """Get current month stats"""
-    df, df_filtered = load_data()
-    
-    # Current month
-    now = datetime.now()
-    month_start = datetime(now.year, now.month, 1).date()
-    month_orders_all = df[df['Fecha'].dt.date >= month_start]  # All orders including ignored
-    month_orders_filtered = df_filtered[df_filtered['Fecha'].dt.date >= month_start]  # Non-ignored only
-    
-    total_orders = len(month_orders_all)  # Count ALL orders
-    total_skus = int(month_orders_filtered['SKUs'].sum())  # Performance metrics from non-ignored
-    total_time = int(month_orders_filtered['Tiempo_mins'].sum())
-    
-    speed = (total_skus / total_time * 60) if total_time > 0 else 0
-    
-    # Calculate total earnings from ALL orders (including ignored)
-    earnings = []
-    for _, row in month_orders_all.iterrows():
-        earnings.append(calculate_earnings(row))
-    total_earned = int(sum(earnings))
-    
-    # Format month name in Spanish
-    month_names_es = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-                      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
-    month_name = month_names_es[now.month - 1]
-    
-    return jsonify({
-        'orders': total_orders,
-        'skus': total_skus,
-        'time': total_time,
-        'speed': round(speed, 1),
-        'earned': total_earned,
-        'month': now.month,
-        'year': now.year,
-        'date_formatted': f"{month_name} {now.year}"
-    })
-
-@app.route('/api/bests')
-def personal_bests():
-    """Get personal best stats"""
-    df, df_filtered = load_data()
-    
-    if len(df_filtered) == 0:
-        return jsonify({
-            'fastest_order': None,
-            'most_skus': None,
-            'best_speed': None
-        })
-    
-    # Calculate speed and earnings for each order
-    df_filtered = df_filtered.copy()
-    df_filtered['speed'] = df_filtered.apply(
-        lambda x: round((x['SKUs'] / x['Tiempo_mins'] * 60), 1) if x['Tiempo_mins'] > 0 else 0,
-        axis=1
-    )
-    df_filtered['earnings'] = df_filtered.apply(calculate_earnings, axis=1)
-    
-    # Fastest order (shortest time with at least 10 SKUs)
-    big_orders = df_filtered[df_filtered['SKUs'] >= 10].copy()
-    fastest = None
-    if len(big_orders) > 0:
-        fastest_row = big_orders.loc[big_orders['Tiempo_mins'].idxmin()]
-        fastest = {
-            'time': int(fastest_row['Tiempo_mins']),
-            'skus': int(fastest_row['SKUs']),
-            'cliente': str(fastest_row['Cliente'])[:20],
-            'fecha': fastest_row['Fecha'].strftime('%d/%m/%Y') if pd.notna(fastest_row['Fecha']) else '',
-            'speed': round(fastest_row['speed'], 1),
-            'earnings': int(fastest_row['earnings']),
-            'tiempo': str(fastest_row.get('Tiempo', ''))
-        }
-    
-    # Most SKUs in one order
-    most_skus_row = df_filtered.loc[df_filtered['SKUs'].idxmax()]
-    most_skus = {
-        'skus': int(most_skus_row['SKUs']),
-        'time': int(most_skus_row['Tiempo_mins']),
-        'cliente': str(most_skus_row['Cliente'])[:20],
-        'fecha': most_skus_row['Fecha'].strftime('%d/%m/%Y') if pd.notna(most_skus_row['Fecha']) else '',
-        'speed': round(most_skus_row['speed'], 1),
-        'earnings': int(most_skus_row['earnings']),
-        'tiempo': str(most_skus_row.get('Tiempo', ''))
+    # Calculate summary stats before limiting
+    # Use all orders for counts, only non-ignored for time-based metrics
+    valid_df = df[~df['Ignorar']]
+    valid_count = len(valid_df)
+    summary = {
+        'total_orders': int(len(df)),
+        'total_skus': int(df['SKUs'].sum()),
+        'total_time_minutes': int(valid_df['TiempoMin'].sum()) if valid_count > 0 else 0,
+        'total_time_hours': round(valid_df['TiempoMin'].sum() / 60, 1) if valid_count > 0 else 0,
+        'avg_sku_per_hour': round(valid_df['SKUPerHour'].mean(), 1) if valid_count > 0 else 0,
+        'avg_min_per_sku': round(valid_df['MinPerSKU'].mean(), 1) if valid_count > 0 else 0,
+        'avg_time_per_order': round(valid_df['TiempoMin'].mean(), 1) if valid_count > 0 else 0
     }
     
-    # Best speed (min 10 SKUs)
-    best_speed_order = None
-    if len(big_orders) > 0:
-        best_speed_row = big_orders.loc[big_orders['speed'].idxmax()]
-        best_speed_order = {
-            'speed': round(best_speed_row['speed'], 1),
-            'skus': int(best_speed_row['SKUs']),
-            'time': int(best_speed_row['Tiempo_mins']),
-            'cliente': str(best_speed_row['Cliente'])[:20],
-            'fecha': best_speed_row['Fecha'].strftime('%d/%m/%Y') if pd.notna(best_speed_row['Fecha']) else '',
-            'earnings': int(best_speed_row['earnings']),
-            'tiempo': str(best_speed_row.get('Tiempo', ''))
+    # Limit results
+    df = df.head(limit)
+    
+    # Handle grouping
+    if grouping == 'day' or grouping == 'month':
+        df['FechaStr'] = df['Fecha'].dt.strftime('%d/%m/%Y')
+        
+        if grouping == 'day':
+            group_key = 'FechaStr'
+        else:  # month
+            df['MonthKey'] = df['Fecha'].dt.strftime('%m/%Y')
+            group_key = 'MonthKey'
+        
+        grouped_data = []
+        for key, group_df in df.groupby(group_key, sort=False):
+            group_orders = []
+            for _, row in group_df.iterrows():
+                order_dict = row.to_dict()
+                # Convert datetime to string
+                if isinstance(order_dict.get('Fecha'), pd.Timestamp):
+                    order_dict['Fecha'] = order_dict['Fecha'].strftime('%d/%m/%Y')
+                # Remove helper columns
+                order_dict.pop('FechaStr', None)
+                order_dict.pop('MonthKey', None)
+                group_orders.append(order_dict)
+            
+            # Use all orders for counts, only non-ignored for time-based metrics
+            valid_group = group_df[~group_df['Ignorar']]
+            valid_count = len(valid_group)
+            avg_sku_hour = round(valid_group['SKUPerHour'].mean(), 1) if valid_count > 0 else 0
+            
+            group_summary = {
+                'key': key,
+                'order_count': len(group_df),
+                'total_skus': int(group_df['SKUs'].sum()),
+                'total_time_minutes': int(valid_group['TiempoMin'].sum()) if valid_count > 0 else 0,
+                'total_time_hours': round(valid_group['TiempoMin'].sum() / 60, 1) if valid_count > 0 else 0,
+                'avg_sku_per_hour': avg_sku_hour,
+                'avg_min_per_sku': round(valid_group['MinPerSKU'].mean(), 1) if valid_count > 0 else 0,
+                'tier': get_tier(avg_sku_hour),
+                'orders': group_orders
+            }
+            grouped_data.append(group_summary)
+        
+        return jsonify({'groups': grouped_data, 'summary': summary, 'grouping': grouping})
+    
+    # Replace NaN with None for valid JSON
+    df = df.replace({pd.NA: None, pd.NaT: None})
+    df = df.where(pd.notna(df), None)
+    
+    # Convert to records
+    orders = df.to_dict('records')
+    
+    # Convert datetime objects to strings for JSON serialization
+    for order in orders:
+        if isinstance(order.get('Fecha'), pd.Timestamp):
+            order['Fecha'] = order['Fecha'].strftime('%d/%m/%Y')
+    
+    return jsonify({'orders': orders, 'summary': summary})
+
+@app.route('/api/quick_stats')
+def get_quick_stats():
+    """API endpoint for quick stats: today, this week, this month, profit"""
+    df = load_data()
+    
+    if df.empty:
+        return jsonify({})
+    
+    # Get current date
+    today = pd.Timestamp.now().normalize()
+    week_start = today - pd.Timedelta(days=today.dayofweek)  # Monday of current week
+    month_start = today.replace(day=1)  # First day of current month
+    
+    # Calculate SKU/hour for each order
+    df = add_metrics(df)
+    
+    # Helper to calculate period stats
+    def period_stats(period_df):
+        count = len(period_df)
+        # Only use non-ignored orders for time-based metrics
+        valid_df = period_df[~period_df['Ignorar']]
+        valid_count = len(valid_df)
+        return {
+            'orders': count,
+            'skus': int(period_df['SKUs'].sum()) if count > 0 else 0,
+            'time_hours': round(valid_df['TiempoMin'].sum() / 60, 1) if valid_count > 0 else 0,
+            'avg_efficiency': round(valid_df['SKUPerHour'].mean(), 1) if valid_count > 0 else 0
         }
     
-    return jsonify({
-        'fastest_order': fastest,
-        'most_skus': most_skus,
-        'best_speed': best_speed_order
-    })
-
-@app.route('/api/all_time')
-def all_time_stats():
-    """Get all-time earnings and stats"""
-    df, df_filtered = load_data()
+    # Calculate stats for each period
+    today_df = df[df['Fecha'] == today]
+    week_df = df[df['Fecha'] >= week_start]
+    month_df = df[df['Fecha'] >= month_start]
     
-    # Calculate total earnings from all orders
-    df = df.copy()
-    earnings = []
-    for _, row in df.iterrows():
-        earnings.append(calculate_earnings(row))
-    df['earnings'] = earnings
-    total_earned = int(df['earnings'].sum())
+    today_stats = period_stats(today_df)
+    week_stats = period_stats(week_df)
+    month_stats = period_stats(month_df)
+    overall_avg_efficiency = round(df['SKUPerHour'].mean(), 1)
     
-    # Total stats
-    total_orders = len(df_filtered)
-    total_skus = int(df_filtered['SKUs'].sum())
-    total_time = int(df_filtered['Tiempo_mins'].sum())
+    # Profit calculations based on actual rates
+    # Standard order: 1300 CLP per order + 75 CLP per SKU (90 CLP on Sundays)
+    # Bipicking order: 1040 CLP per order + 60 CLP per SKU (72 CLP on Sundays)
     
-    avg_speed = (total_skus / total_time * 60) if total_time > 0 else 0
-    
-    return jsonify({
-        'total_earned': total_earned,
-        'total_orders': total_orders,
-        'total_skus': total_skus,
-        'avg_speed': round(avg_speed, 1)
-    })
-
-@app.route('/api/records_detailed')
-def records_detailed():
-    """Get detailed records and analytics"""
-    df, df_filtered = load_data()
-    
-    # Calculate speed for all orders
-    df_filtered['speed'] = (df_filtered['SKUs'] / df_filtered['Tiempo_mins'] * 60).round(1)
-    
-    # Speed distribution by SKU ranges
-    speed_by_range = {}
-    ranges = [(1, 5), (6, 10), (11, 20), (21, 30), (31, 50), (51, 100)]
-    
-    for min_skus, max_skus in ranges:
-        range_data = df_filtered[(df_filtered['SKUs'] >= min_skus) & (df_filtered['SKUs'] <= max_skus)]
-        if len(range_data) > 0:
-            speed_by_range[f"{min_skus}-{max_skus} SKUs"] = {
-                'avg_speed': round(range_data['speed'].mean(), 1),
-                'max_speed': round(range_data['speed'].max(), 1),
-                'orders': len(range_data),
-                'avg_time': round(range_data['Tiempo_mins'].mean(), 1)
-            }
-    
-    # Top 10 fastest orders
-    top_fast = df_filtered.nsmallest(10, 'Tiempo_mins')[['Cliente', 'SKUs', 'Tiempo_mins', 'speed']].to_dict('records')
-    
-    # Top 10 highest speed orders (min 10 SKUs)
-    big_orders = df_filtered[df_filtered['SKUs'] >= 10]
-    top_speed = big_orders.nlargest(10, 'speed')[['Cliente', 'SKUs', 'Tiempo_mins', 'speed']].to_dict('records')
-    
-    # Speed trends over time (last 30 days)
-    recent_30 = df_filtered[df_filtered['Fecha'] >= (datetime.now() - timedelta(days=30))]
-    daily_avg = recent_30.groupby(recent_30['Fecha'].dt.date)['speed'].mean().round(1)
-    speed_trend = [{'date': str(date), 'speed': float(speed)} for date, speed in daily_avg.items()]
-    
-    # Weekly performance comparison
-    weeks = []
-    for i in range(4):  # Last 4 weeks
-        week_start = datetime.now() - timedelta(days=(i+1)*7)
-        week_end = week_start + timedelta(days=7)
-        week_data = df_filtered[(df_filtered['Fecha'] >= week_start) & (df_filtered['Fecha'] < week_end)]
+    def calculate_earnings(period_df):
+        earnings = 0
+        for _, row in period_df.iterrows():
+            cliente = str(row.get('Cliente', ''))
+            skus = row['SKUs']
+            fecha = row['Fecha']
+            
+            # Check if it's a bipicking order (has (A) or (B) prefix)
+            is_bipicking = '(A)' in cliente or '(B)' in cliente
+            
+            # Check if it's Sunday (weekday 6)
+            is_sunday = fecha.weekday() == 6 if pd.notna(fecha) else False
+            
+            if is_bipicking:
+                base_per_order = 1040
+                sku_rate = 72 if is_sunday else 60
+            else:
+                base_per_order = 1300
+                sku_rate = 90 if is_sunday else 75
+            
+            earnings += base_per_order + (skus * sku_rate)
         
-        if len(week_data) > 0:
-            weeks.append({
-                'week': f"Semana {4-i}",
-                'orders': len(week_data),
-                'avg_speed': round(week_data['speed'].mean(), 1),
-                'total_skus': int(week_data['SKUs'].sum()),
-                'total_time': int(week_data['Tiempo_mins'].sum())
-            })
+        return int(earnings)  # Return as integer CLP
     
-    return jsonify({
-        'speed_by_range': speed_by_range,
-        'top_fast_orders': top_fast,
-        'top_speed_orders': top_speed,
-        'speed_trend': speed_trend[-14:],  # Last 14 days
-        'weekly_comparison': weeks
-    })
+    # Add earnings to each period
+    today_stats['earnings'] = calculate_earnings(today_df)
+    week_stats['earnings'] = calculate_earnings(week_df)
+    month_stats['earnings'] = calculate_earnings(month_df)
+    
+    stats = {
+        'today': today_stats,
+        'week': week_stats,
+        'month': month_stats,
+        'overall': {
+            'avg_efficiency': overall_avg_efficiency,
+            'total_orders': int(len(df)),
+            'earnings': calculate_earnings(df)
+        }
+    }
+    
+    return jsonify(stats)
 
-@app.route('/api/products/search')
-def search_products():
-    """Search products in the database"""
-    from flask import request
-    query = request.args.get('q', '')
-    limit = int(request.args.get('limit', 20))
+@app.route('/api/records')
+def get_records():
+    """API endpoint for personal records and achievements"""
+    df = load_data()
+    
+    if df.empty:
+        return jsonify({'error': 'No data available'})
     
     try:
-        # Load product database
-        with open('data/product_database.json', 'r', encoding='utf-8') as f:
-            db = json.load(f)
+        df = add_metrics(df)
+        df['FechaStr'] = df['Fecha'].dt.strftime('%d/%m/%Y')
         
-        # Simple search through products
-        results = []
-        query_lower = query.lower()
+        # Only use non-ignored orders for efficiency-based records
+        valid_df = df[~df['Ignorar']]
         
-        for product in db['products'].values():
-            if (query_lower in product['name'].lower() or 
-                query_lower in product['brand'].lower() or
-                any(query_lower in cat.lower() for cat in product['categories'])):
-                results.append(product)
+        # Best single order (fastest SKU/hour)
+        best_order = valid_df.loc[valid_df['SKUPerHour'].idxmax()]
         
-        # Sort by frequency (most popular first)
-        results.sort(key=lambda x: x['frequency'], reverse=True)
+        # Aggregation config for groupby operations
+        agg_config = {'SKUPerHour': 'mean', 'SKUs': 'sum', 'TiempoMin': 'sum', 'Cliente': 'count'}
+        col_names = ['AvgSKUPerHour', 'TotalSKUs', 'TotalTime', 'OrderCount']
         
-        return jsonify(results[:limit])
+        # Best day (group by date, highest average SKU/hour) - use valid orders for efficiency
+        daily_stats = valid_df.groupby('FechaStr').agg(agg_config).reset_index()
+        daily_stats.columns = ['Fecha'] + col_names
+        best_day = daily_stats.loc[daily_stats['AvgSKUPerHour'].idxmax()]
+        most_skus_day = daily_stats.loc[daily_stats['TotalSKUs'].idxmax()]
+        most_orders_day = daily_stats.loc[daily_stats['OrderCount'].idxmax()]
+        
+        # Best week (group by week) - use valid orders for efficiency
+        valid_df['Week'] = valid_df['Fecha'].dt.to_period('W')
+        weekly_stats = valid_df.groupby('Week').agg(agg_config).reset_index()
+        weekly_stats.columns = ['Week'] + col_names
+        if len(weekly_stats) > 0:
+            best_week = weekly_stats.loc[weekly_stats['AvgSKUPerHour'].idxmax()]
+            best_week_str = f"{best_week['Week'].start_time.strftime('%d/%m/%Y')} - {best_week['Week'].end_time.strftime('%d/%m/%Y')}"
+        else:
+            best_week = None
+            best_week_str = "N/A"
+        
+        # Longest streak of good days (>=20 SKU/h)
+        daily_stats['IsGood'] = daily_stats['AvgSKUPerHour'] >= 20
+        current_streak = 0
+        max_streak = 0
+        for is_good in daily_stats['IsGood']:
+            if is_good:
+                current_streak += 1
+                max_streak = max(max_streak, current_streak)
+            else:
+                current_streak = 0
     
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/products/brands')
-def get_brands():
-    """Get brand statistics"""
-    try:
-        with open('data/product_database.json', 'r', encoding='utf-8') as f:
-            db = json.load(f)
-        
-        # Sort brands by product count
-        brands = sorted(db['brand_stats'].items(), 
-                       key=lambda x: x[1]['product_count'], 
-                       reverse=True)
-        
-        return jsonify({
-            'brands': dict(brands),
-            'total_brands': len(brands)
-        })
-    
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/products/locations')
-def get_locations():
-    """Get location statistics"""
-    try:
-        with open('data/product_database.json', 'r', encoding='utf-8') as f:
-            db = json.load(f)
-        
-        return jsonify(db['location_stats'])
-    
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/products/by-location')
-def products_by_location():
-    """Get products from a specific location"""
-    from flask import request
-    location = request.args.get('location', '')
-    
-    try:
-        with open('data/product_database.json', 'r', encoding='utf-8') as f:
-            db = json.load(f)
-        
-        # Find products in the specified location
-        products = []
-        for product in db['products'].values():
-            if location in product['locations']:
-                products.append(product)
-        
-        # Sort by frequency
-        products.sort(key=lambda x: x['frequency'], reverse=True)
-        
-        return jsonify({
-            'location': location,
-            'products': products,
-            'count': len(products)
-        })
-    
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/products/browse')
-def browse_all_products():
-    """Browse all products with sorting and pagination"""
-    from flask import request
-    
-    # Get parameters
-    sort_by = request.args.get('sort', 'name')  # name, brand, frequency, price
-    order = request.args.get('order', 'asc')    # asc, desc
-    page = int(request.args.get('page', 1))
-    per_page = int(request.args.get('per_page', 20))
-    
-    try:
-        with open('data/product_database.json', 'r', encoding='utf-8') as f:
-            db = json.load(f)
-        
-        # Convert products dict to list
-        products = list(db['products'].values())
-        
-        # Sort products
-        if sort_by == 'name':
-            products.sort(key=lambda x: x['name'].lower(), reverse=(order == 'desc'))
-        elif sort_by == 'brand':
-            products.sort(key=lambda x: x['brand'].lower(), reverse=(order == 'desc'))
-        elif sort_by == 'frequency':
-            products.sort(key=lambda x: x['frequency'], reverse=(order == 'desc'))
-        elif sort_by == 'price':
-            products.sort(key=lambda x: x['avg_price_per_unit'], reverse=(order == 'desc'))
-        
-        # Paginate
-        total = len(products)
-        start = (page - 1) * per_page
-        end = start + per_page
-        paginated_products = products[start:end]
-        
-        return jsonify({
-            'products': paginated_products,
-            'pagination': {
-                'page': page,
-                'per_page': per_page,
-                'total': total,
-                'pages': (total + per_page - 1) // per_page
+        records = {
+            'best_order': {
+                'sku_per_hour': float(best_order['SKUPerHour']),
+                'skus': int(best_order['SKUs']),
+                'time': str(best_order['Tiempo']),
+                'date': best_order['FechaStr'],
+                'cliente': str(best_order['Cliente'])
             },
-            'sort': {
-                'by': sort_by,
-                'order': order
+            'best_day': {
+                'avg_sku_per_hour': round(best_day['AvgSKUPerHour'], 1),
+                'total_skus': int(best_day['TotalSKUs']),
+                'total_time': round(best_day['TotalTime'] / 60, 1),
+                'order_count': int(best_day['OrderCount']),
+                'date': best_day['Fecha']
+            },
+            'most_skus_day': {
+                'total_skus': int(most_skus_day['TotalSKUs']),
+                'order_count': int(most_skus_day['OrderCount']),
+                'date': most_skus_day['Fecha']
+            },
+            'most_orders_day': {
+                'order_count': int(most_orders_day['OrderCount']),
+                'total_skus': int(most_orders_day['TotalSKUs']),
+                'date': most_orders_day['Fecha']
+            },
+            'best_week': {
+                'avg_sku_per_hour': round(best_week['AvgSKUPerHour'], 1) if best_week is not None else 0,
+                'total_skus': int(best_week['TotalSKUs']) if best_week is not None else 0,
+                'order_count': int(best_week['OrderCount']) if best_week is not None else 0,
+                'week_range': best_week_str
+            } if best_week is not None else None,
+            'longest_streak': {
+                'days': int(max_streak)
             }
-        })
-    
+        }
+        
+        return jsonify(records)
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/products/database')
-def get_product_database():
-    """Get full product database summary"""
-    try:
-        with open('data/product_database.json', 'r', encoding='utf-8') as f:
-            db = json.load(f)
-        
-        return jsonify(db['summary'])
-    
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/layout')
-def get_layout():
-    """Serve darkstore layout data"""
-    try:
-        with open('data/darkstore_layout.json', 'r', encoding='utf-8') as f:
-            layout_data = json.load(f)
-        return jsonify(layout_data)
-    except FileNotFoundError:
-        return jsonify({'error': 'Layout file not found'}), 404
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-# New Orders Management API
-@app.route('/api/orders/daily')
-def daily_orders():
-    """Get orders grouped by day"""
-    try:
-        df, df_filtered = load_data()
-        
-        # Group orders by date - use full df to get all dates including ignored orders
-        daily_data = []
-        dates = df['Fecha'].dt.date.unique()
-        dates = sorted([d for d in dates if pd.notna(d)], reverse=True)
-        
-        for date in dates:
-            # All orders for the day (including ignored)
-            day_orders_all = df[df['Fecha'].dt.date == date]
-            # Non-ignored orders for performance metrics
-            day_orders_filtered = df_filtered[df_filtered['Fecha'].dt.date == date]
-            
-            # Calculate earnings for ALL orders (including ignored)
-            earnings = []
-            for _, row in day_orders_all.iterrows():
-                earnings.append(calculate_earnings(row))
-            
-            daily_data.append({
-                'date': date.strftime('%Y-%m-%d'),
-                'date_formatted': date.strftime('%d/%m/%Y'),
-                'weekday': date.strftime('%A'),
-                'orders_count': len(day_orders_all),  # Count ALL orders
-                'total_skus': int(day_orders_filtered['SKUs'].sum()),  # Performance metrics from non-ignored
-                'total_time_mins': int(day_orders_filtered['Tiempo_mins'].sum()),
-                'total_earned': sum(earnings),
-                'avg_skus_per_order': round(day_orders_filtered['SKUs'].mean(), 1) if len(day_orders_filtered) > 0 else 0,
-                'speed': round((day_orders_filtered['SKUs'].sum() / day_orders_filtered['Tiempo_mins'].sum() * 60), 1) if day_orders_filtered['Tiempo_mins'].sum() > 0 else 0,
-                'orders': [
-                    {
-                        'cliente': row['Cliente'],
-                        'skus': int(row['SKUs']),
-                        'tiempo': row['Tiempo'],
-                        'tiempo_mins': int(row['Tiempo_mins']),
-                        'earnings': calculate_earnings(row),
-                        'ignored': bool(row.get('Ignorar', False)),  # Include ignored flag
-                        'tipo': 'Bipicking' if ('(A)' in str(row.get('Cliente', '')) or '(B)' in str(row.get('Cliente', ''))) else 'Mono'
-                    }
-                    for _, row in day_orders_all.iterrows()  # Show ALL orders
-                ]
-            })
-        
-        return jsonify(daily_data)
-    
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/orders/monthly')
-def monthly_orders():
-    """Get orders grouped by month"""
-    try:
-        df, df_filtered = load_data()
-        
-        # Group orders by month - use ALL orders to get all months
-        df['year_month'] = df['Fecha'].dt.to_period('M')
-        monthly_data = []
-        
-        months = df['year_month'].unique()
-        months = sorted([m for m in months if pd.notna(m)], reverse=True)
-        
-        for month in months:
-            month_orders_all = df[df['year_month'] == month]  # All orders including ignored
-            month_orders_filtered = df_filtered[df_filtered['Fecha'].dt.to_period('M') == month]  # Non-ignored only
-            
-            # Calculate earnings for ALL orders (including ignored)
-            earnings = []
-            for _, row in month_orders_all.iterrows():
-                earnings.append(calculate_earnings(row))
-            
-            # Group by days in the month - show all days with orders
-            daily_breakdown = []
-            days = month_orders_all['Fecha'].dt.date.unique()
-            days = sorted([d for d in days if pd.notna(d)])
-            
-            for day in days:
-                day_orders_all = month_orders_all[month_orders_all['Fecha'].dt.date == day]
-                day_earnings = []
-                for _, row in day_orders_all.iterrows():
-                    day_earnings.append(calculate_earnings(row))
-                
-                daily_breakdown.append({
-                    'date': day.strftime('%Y-%m-%d'),
-                    'date_formatted': day.strftime('%d/%m'),
-                    'weekday': day.strftime('%a'),
-                    'orders_count': len(day_orders_all),  # Count ALL orders
-                    'total_skus': int(day_orders_all['SKUs'].sum()),
-                    'total_earned': sum(day_earnings)
-                })
-            
-            monthly_data.append({
-                'month': str(month),
-                'month_formatted': month.strftime('%B %Y'),
-                'orders_count': len(month_orders_all),  # Count ALL orders
-                'total_skus': int(month_orders_filtered['SKUs'].sum()),  # Performance metrics from non-ignored
-                'total_time_mins': int(month_orders_filtered['Tiempo_mins'].sum()),
-                'total_earned': sum(earnings),
-                'avg_skus_per_order': round(month_orders_filtered['SKUs'].mean(), 1) if len(month_orders_filtered) > 0 else 0,
-                'speed': round((month_orders_filtered['SKUs'].sum() / month_orders_filtered['Tiempo_mins'].sum() * 60), 1) if month_orders_filtered['Tiempo_mins'].sum() > 0 else 0,
-                'working_days': len(days),
-                'daily_breakdown': daily_breakdown
-            })
-        
-        return jsonify(monthly_data)
-    
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-# Enhanced Product Browsing API
-@app.route('/api/products/enhanced/by-brand')
-def enhanced_products_by_brand():
-    """Get products organized by brand with expandable structure"""
-    try:
-        from tools.product_database import ProductDatabase
-        
-        with open('data/product_database.json', 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        
-        products = data['products']
-        brand_stats = data['brand_stats']
-        
-        # Organize products by brand
-        brands_data = []
-        for brand, stats in sorted(brand_stats.items()):
-            brand_products = []
-            
-            for product_id, product in products.items():
-                if product['brand'] == brand:
-                    brand_products.append({
-                        'id': product_id,
-                        'name': product['name'],
-                        'frequency': product['frequency'],
-                        'locations': product['locations'],
-                        'prices': product['prices'],
-                        'categories': product.get('categories', []),
-                        'avg_price': product.get('avg_price_per_unit', 0)
-                    })
-            
-            # Sort products by frequency (most picked first)
-            brand_products.sort(key=lambda x: x['frequency'], reverse=True)
-            
-            brands_data.append({
-                'brand': brand,
-                'product_count': stats['product_count'],
-                'total_frequency': stats['total_frequency'],
-                'avg_frequency': stats['avg_frequency'],
-                'locations_count': len(stats['locations']),
-                'price_range': {
-                    'min': stats.get('min_price', 0),
-                    'max': stats.get('max_price', 0),
-                    'avg': stats.get('avg_price', 0)
-                },
-                'products': brand_products
-            })
-        
-        # Sort brands by total frequency (most active brands first)
-        brands_data.sort(key=lambda x: x['total_frequency'], reverse=True)
-        
-        return jsonify(brands_data)
-    
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/products/enhanced/by-location')
-def enhanced_products_by_location():
-    """Get products organized by location/shelf with expandable structure"""
-    try:
-        with open('data/product_database.json', 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        
-        products = data['products']
-        location_stats = data['location_stats']
-        
-        # Organize products by location
-        locations_data = []
-        for location, stats in sorted(location_stats.items()):
-            if not location.strip():  # Skip empty locations
-                continue
-                
-            location_products = []
-            
-            for product_id, product in products.items():
-                if location in product['locations']:
-                    location_products.append({
-                        'id': product_id,
-                        'name': product['name'],
-                        'brand': product['brand'],
-                        'frequency': product['frequency'],
-                        'prices': product['prices'],
-                        'categories': product.get('categories', []),
-                        'avg_price': product.get('avg_price_per_unit', 0)
-                    })
-            
-            # Sort products by frequency (most picked first)
-            location_products.sort(key=lambda x: x['frequency'], reverse=True)
-            
-            # Parse location for better organization
-            location_parts = location.split()
-            pasillo = None
-            estante = None
-            
-            if len(location_parts) >= 3:
-                if location_parts[0] == 'PASILLO':
-                    pasillo = location_parts[1]
-                if len(location_parts) >= 3 and location_parts[2] == 'ESTANTE':
-                    estante = location_parts[3] if len(location_parts) > 3 else None
-            
-            locations_data.append({
-                'location': location,
-                'pasillo': pasillo,
-                'estante': estante,
-                'product_count': stats['product_count'],
-                'brands_count': len(stats['brands']),
-                'total_frequency': stats['total_frequency'],
-                'brands': list(stats['brands']),
-                'products': location_products
-            })
-        
-        # Sort locations by pasillo and estante
-        def location_sort_key(loc):
-            pasillo = int(loc['pasillo']) if loc['pasillo'] and loc['pasillo'].isdigit() else 999
-            estante = int(loc['estante']) if loc['estante'] and loc['estante'].isdigit() else 999
-            return (pasillo, estante)
-        
-        locations_data.sort(key=location_sort_key)
-        
-        return jsonify(locations_data)
-    
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/products/enhanced/by-category')
-def enhanced_products_by_category():
-    """Get products organized by category with expandable structure"""
-    try:
-        with open('data/product_database.json', 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        
-        products = data['products']
-        
-        # Organize products by category
-        categories_data = {}
-        
-        for product_id, product in products.items():
-            categories = product.get('categories', ['Uncategorized'])
-            
-            for category in categories:
-                if category not in categories_data:
-                    categories_data[category] = {
-                        'category': category,
-                        'product_count': 0,
-                        'total_frequency': 0,
-                        'brands': set(),
-                        'locations': set(),
-                        'products': []
-                    }
-                
-                categories_data[category]['product_count'] += 1
-                categories_data[category]['total_frequency'] += product['frequency']
-                categories_data[category]['brands'].add(product['brand'])
-                categories_data[category]['locations'].update(product['locations'])
-                
-                categories_data[category]['products'].append({
-                    'id': product_id,
-                    'name': product['name'],
-                    'brand': product['brand'],
-                    'frequency': product['frequency'],
-                    'locations': product['locations'],
-                    'prices': product['prices'],
-                    'avg_price': product.get('avg_price_per_unit', 0)
-                })
-        
-        # Convert to list and clean up sets
-        categories_list = []
-        for category, data in categories_data.items():
-            data['brands'] = list(data['brands'])
-            data['locations'] = list(data['locations'])
-            data['brands_count'] = len(data['brands'])
-            data['locations_count'] = len(data['locations'])
-            
-            # Sort products by frequency
-            data['products'].sort(key=lambda x: x['frequency'], reverse=True)
-            
-            categories_list.append(data)
-        
-        # Sort categories by total frequency
-        categories_list.sort(key=lambda x: x['total_frequency'], reverse=True)
-        
-        return jsonify(categories_list)
-    
-    except Exception as e:
+        print(f"Error in /api/records: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)
